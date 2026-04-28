@@ -1,1 +1,93 @@
+{{#> layouts/main title=title }}
+<div class="page-header d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3">Inventory</h1>
+  <a href="/assets/new" class="btn btn-primary btn-sm">+ Add Asset</a>
+</div>
 
+{{> partials/flash }}
+
+<!-- Filter bar -->
+<form method="GET" action="/assets" class="row g-2 mb-4">
+  <div class="col-md-4">
+    <input type="text" name="search" class="form-control form-control-sm"
+           placeholder="Search ID, serial, model, brand…"
+           value="{{query.search}}">
+  </div>
+  <div class="col-md-2">
+    <select name="status" class="form-select form-select-sm">
+      <option value="">All Statuses</option>
+      {{#each (array "Available" "In-Use" "Maintenance" "Retired")}}
+        <option value="{{this}}" {{#eq this ../query.status}}selected{{/eq}}>{{this}}</option>
+      {{/each}}
+    </select>
+  </div>
+  <div class="col-md-2">
+    <select name="category" class="form-select form-select-sm">
+      <option value="">All Categories</option>
+      {{#each (array "Laptop" "Desktop" "Server" "Monitor" "Keyboard" "Mouse" "Printer" "Other")}}
+        <option value="{{this}}" {{#eq this ../query.category}}selected{{/eq}}>{{this}}</option>
+      {{/each}}
+    </select>
+  </div>
+  <div class="col-md-2">
+    <select name="type" class="form-select form-select-sm">
+      <option value="">All Types</option>
+      <option value="Computer" {{#eq query.type "Computer"}}selected{{/eq}}>Computer</option>
+      <option value="Peripheral" {{#eq query.type "Peripheral"}}selected{{/eq}}>Peripheral</option>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <button type="submit" class="btn btn-secondary btn-sm w-100">Filter</button>
+  </div>
+</form>
+
+<!-- Table -->
+<div class="table-responsive">
+  <table class="table table-hover table-sm align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th>Item ID</th>
+        <th>Brand / Model</th>
+        <th>Category</th>
+        <th>Serial</th>
+        <th>Status</th>
+        <th>Assigned To</th>
+        <th>Date Acquired</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#if items.length}}
+        {{#each items}}
+        <tr>
+          <td><code>{{itemId}}</code></td>
+          <td>{{brand}} {{model}}</td>
+          <td>{{category}}</td>
+          <td><small class="text-muted">{{serialNumber}}</small></td>
+          <td>
+            <span class="badge
+              {{#eq status 'Available'}}bg-success{{/eq}}
+              {{#eq status 'In-Use'}}bg-primary{{/eq}}
+              {{#eq status 'Maintenance'}}bg-warning text-dark{{/eq}}
+              {{#eq status 'Retired'}}bg-secondary{{/eq}}">
+              {{status}}
+            </span>
+          </td>
+          <td>{{#if assignedTo}}{{assignedTo.name}}{{else}}&mdash;{{/if}}</td>
+          <td>{{formatDate dateAcquired}}</td>
+          <td class="text-end">
+            <a href="/assets/{{_id}}" class="btn btn-sm btn-outline-secondary">View</a>
+          </td>
+        </tr>
+        {{/each}}
+      {{else}}
+        <tr>
+          <td colspan="8" class="text-center text-muted py-4">No assets found.</td>
+        </tr>
+      {{/if}}
+    </tbody>
+  </table>
+</div>
+
+{{> partials/pagination total=total page=page pages=pages limit=limit }}
+{{/> layouts/main }}

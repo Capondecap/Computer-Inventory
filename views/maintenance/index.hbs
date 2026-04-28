@@ -1,1 +1,80 @@
+{{#> layouts/main title=title }}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3">Maintenance</h1>
+  <a href="/maintenance/new" class="btn btn-sm btn-secondary">+ Log Maintenance</a>
+</div>
 
+{{> partials/flash }}
+
+<form method="GET" action="/maintenance" class="row g-2 mb-4">
+  <div class="col-md-3">
+    <select name="status" class="form-select form-select-sm">
+      <option value="">All Statuses</option>
+      {{#each (array "Pending" "In-Progress" "Completed")}}
+        <option value="{{this}}" {{#eq this ../query.status}}selected{{/eq}}>{{this}}</option>
+      {{/each}}
+    </select>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
+  </div>
+</form>
+
+<div class="table-responsive">
+  <table class="table table-hover table-sm align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th>Asset</th>
+        <th>Description</th>
+        <th>Requested By</th>
+        <th>Start</th>
+        <th>Completed</th>
+        <th>Status</th>
+        <th>Cost</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#if items.length}}
+        {{#each items}}
+        <tr>
+          <td>
+            <a href="/assets/{{asset._id}}">
+              <code>{{asset.itemId}}</code> {{asset.brand}} {{asset.model}}
+            </a>
+          </td>
+          <td>{{truncate description 60}}</td>
+          <td><small>{{requestedBy.name}}</small></td>
+          <td><small>{{formatDate startDate}}</small></td>
+          <td>
+            {{#if completedDate}}
+              <small>{{formatDate completedDate}}</small>
+            {{else}}&mdash;{{/if}}
+          </td>
+          <td>
+            <span class="badge
+              {{#eq status 'Pending'}}bg-secondary{{/eq}}
+              {{#eq status 'In-Progress'}}bg-warning text-dark{{/eq}}
+              {{#eq status 'Completed'}}bg-success{{/eq}}">
+              {{status}}
+            </span>
+          </td>
+          <td>{{#if cost}}${{cost}}{{else}}&mdash;{{/if}}</td>
+          <td class="text-end">
+            {{#unless (eq status "Completed")}}
+              <a href="/maintenance/{{_id}}/edit" class="btn btn-sm btn-outline-secondary">Update</a>
+            {{/unless}}
+          </td>
+        </tr>
+        {{/each}}
+      {{else}}
+        <tr>
+          <td colspan="8" class="text-center text-muted py-4">No maintenance records found.</td>
+        </tr>
+      {{/if}}
+    </tbody>
+  </table>
+</div>
+
+{{> partials/pagination total=total page=page pages=pages limit=limit }}
+{{/> layouts/main }}

@@ -1,1 +1,97 @@
+{{#> layouts/main title=title }}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="mb-0">{{#if asset._id}}Edit Asset{{else}}Add New Asset{{/if}}</h4>
+      </div>
+      <div class="card-body">
+        {{> partials/flash }}
 
+        {{#if errors}}
+        <div class="alert alert-danger">
+          <ul class="mb-0">
+            {{#each errors}}<li>{{this}}</li>{{/each}}
+          </ul>
+        </div>
+        {{/if}}
+
+        <form method="POST" action="{{#if asset._id}}/assets/{{asset._id}}{{else}}/assets{{/if}}">
+
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Item ID <span class="text-danger">*</span></label>
+              <input type="text" name="itemId" class="form-control"
+                     value="{{asset.itemId}}" placeholder="e.g. IT-0042"
+                     {{#if asset._id}}readonly{{/if}} required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Serial Number <span class="text-danger">*</span></label>
+              <input type="text" name="serialNumber" class="form-control"
+                     value="{{asset.serialNumber}}" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Date Acquired <span class="text-danger">*</span></label>
+              <input type="date" name="dateAcquired" class="form-control"
+                     value="{{formatDate asset.dateAcquired 'YYYY-MM-DD'}}" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Brand <span class="text-danger">*</span></label>
+              <input type="text" name="brand" class="form-control"
+                     value="{{asset.brand}}" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Model <span class="text-danger">*</span></label>
+              <input type="text" name="model" class="form-control"
+                     value="{{asset.model}}" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Type <span class="text-danger">*</span></label>
+              <select name="type" class="form-select" required>
+                <option value="">Select type…</option>
+                <option value="Computer" {{#eq asset.type "Computer"}}selected{{/eq}}>Computer</option>
+                <option value="Peripheral" {{#eq asset.type "Peripheral"}}selected{{/eq}}>Peripheral</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Category <span class="text-danger">*</span></label>
+              <select name="category" class="form-select" required>
+                <option value="">Select category…</option>
+                {{#each (array "Laptop" "Desktop" "Server" "Monitor" "Keyboard" "Mouse" "Printer" "Other")}}
+                  <option value="{{this}}" {{#eq this ../asset.category}}selected{{/eq}}>{{this}}</option>
+                {{/each}}
+              </select>
+            </div>
+
+            {{#if asset._id}}
+            <div class="col-md-6">
+              <label class="form-label">Status</label>
+              <select name="status" class="form-select">
+                {{#each (array "Available" "In-Use" "Maintenance" "Retired")}}
+                  <option value="{{this}}" {{#eq this ../asset.status}}selected{{/eq}}>{{this}}</option>
+                {{/each}}
+              </select>
+            </div>
+            {{/if}}
+
+            <div class="col-12">
+              <label class="form-label">Notes</label>
+              <textarea name="notes" class="form-control" rows="3">{{asset.notes}}</textarea>
+            </div>
+          </div>
+
+          <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+              {{#if asset._id}}Save Changes{{else}}Create Asset{{/if}}
+            </button>
+            <a href="{{#if asset._id}}/assets/{{asset._id}}{{else}}/assets{{/if}}"
+               class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{{/> layouts/main }}
