@@ -9,6 +9,7 @@ const morgan = require('morgan');
 
 const indexRoutes = require('./routes/index');
 const authRoutes = require('./routes/auth.routes');
+const assetRoutes = require('./routes/asset.routes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -41,8 +42,9 @@ if (process.env.NODE_ENV !== 'test') {
 app.use(express.static('public'));
 
 app.use('/', indexRoutes);
-app.use('/auth', authRoutes);      // form POST: /auth/login
-app.use('/api/auth', authRoutes);  // API POST: /api/auth/login
+app.use('/auth', authRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/items', assetRoutes);
 
 app.use(errorHandler);
 
