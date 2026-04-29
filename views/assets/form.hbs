@@ -1,1 +1,285 @@
+<div class="page-actions">
+    <a href="/assets" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Assets
+    </a>
+</div>
 
+<div class="form-container">
+    <div class="card">
+        <div class="card-header">
+            <h2>{{#if asset}}Edit Asset{{else}}Add New Asset{{/if}}</h2>
+        </div>
+        <div class="card-body">
+            <form action="{{#if asset}}/assets/{{asset._id}}{{else}}/assets{{/if}}" method="POST" id="asset-form" novalidate>
+                {{#if asset}}
+                <input type="hidden" name="_method" value="PUT">
+                {{/if}}
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="serialNumber" class="required">Serial Number</label>
+                        <input 
+                            type="text" 
+                            id="serialNumber" 
+                            name="serialNumber" 
+                            class="form-control" 
+                            placeholder="e.g., SN123456789"
+                            value="{{asset.serialNumber}}"
+                            required
+                        >
+                        <small class="form-help">Unique identifier from manufacturer</small>
+                        <span class="form-error"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="assetId">Asset ID</label>
+                        <input 
+                            type="text" 
+                            id="assetId" 
+                            name="assetId" 
+                            class="form-control" 
+                            placeholder="Auto-generated if empty"
+                            value="{{asset.assetId}}"
+                            {{#if asset}}readonly{{/if}}
+                        >
+                        <small class="form-help">Leave empty for auto-generation</small>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="brand" class="required">Brand</label>
+                        <input 
+                            type="text" 
+                            id="brand" 
+                            name="brand" 
+                            class="form-control" 
+                            placeholder="e.g., Dell, HP, Lenovo"
+                            value="{{asset.brand}}"
+                            list="brand-suggestions"
+                            required
+                        >
+                        <datalist id="brand-suggestions">
+                            <option value="Dell">
+                            <option value="HP">
+                            <option value="Lenovo">
+                            <option value="Apple">
+                            <option value="Asus">
+                            <option value="Acer">
+                            <option value="Microsoft">
+                        </datalist>
+                        <span class="form-error"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="model" class="required">Model</label>
+                        <input 
+                            type="text" 
+                            id="model" 
+                            name="model" 
+                            class="form-control" 
+                            placeholder="e.g., Latitude 5420, ThinkPad X1"
+                            value="{{asset.model}}"
+                            required
+                        >
+                        <span class="form-error"></span>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="category" class="required">Category</label>
+                        <select id="category" name="category" class="form-control" required>
+                            <option value="">Select Category</option>
+                            <optgroup label="Computers">
+                                <option value="Laptop" {{#ifEquals asset.category 'Laptop'}}selected{{/ifEquals}}>Laptop</option>
+                                <option value="Desktop" {{#ifEquals asset.category 'Desktop'}}selected{{/ifEquals}}>Desktop</option>
+                                <option value="Server" {{#ifEquals asset.category 'Server'}}selected{{/ifEquals}}>Server</option>
+                            </optgroup>
+                            <optgroup label="Peripherals">
+                                <option value="Monitor" {{#ifEquals asset.category 'Monitor'}}selected{{/ifEquals}}>Monitor</option>
+                                <option value="Keyboard" {{#ifEquals asset.category 'Keyboard'}}selected{{/ifEquals}}>Keyboard</option>
+                                <option value="Mouse" {{#ifEquals asset.category 'Mouse'}}selected{{/ifEquals}}>Mouse</option>
+                                <option value="Printer" {{#ifEquals asset.category 'Printer'}}selected{{/ifEquals}}>Printer</option>
+                                <option value="Headset" {{#ifEquals asset.category 'Headset'}}selected{{/ifEquals}}>Headset</option>
+                                <option value="Webcam" {{#ifEquals asset.category 'Webcam'}}selected{{/ifEquals}}>Webcam</option>
+                            </optgroup>
+                            <option value="Other" {{#ifEquals asset.category 'Other'}}selected{{/ifEquals}}>Other</option>
+                        </select>
+                        <span class="form-error"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="status" class="required">Status</label>
+                        <select id="status" name="status" class="form-control" required>
+                            <option value="Available" {{#ifEquals asset.status 'Available'}}selected{{/ifEquals}}>Available</option>
+                            <option value="In-Use" {{#ifEquals asset.status 'In-Use'}}selected{{/ifEquals}}>In Use</option>
+                            <option value="Maintenance" {{#ifEquals asset.status 'Maintenance'}}selected{{/ifEquals}}>Maintenance</option>
+                            <option value="Retired" {{#ifEquals asset.status 'Retired'}}selected{{/ifEquals}}>Retired</option>
+                        </select>
+                        <span class="form-error"></span>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dateAcquired" class="required">Date Acquired</label>
+                        <input 
+                            type="date" 
+                            id="dateAcquired" 
+                            name="dateAcquired" 
+                            class="form-control" 
+                            value="{{formatDateInput asset.dateAcquired}}"
+                            max="{{getCurrentDate}}"
+                            required
+                        >
+                        <span class="form-error"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="purchasePrice">Purchase Price ($)</label>
+                        <input 
+                            type="number" 
+                            id="purchasePrice" 
+                            name="purchasePrice" 
+                            class="form-control" 
+                            placeholder="0.00"
+                            value="{{asset.purchasePrice}}"
+                            min="0"
+                            step="0.01"
+                        >
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="warrantyExpiry">Warranty Expiry</label>
+                        <input 
+                            type="date" 
+                            id="warrantyExpiry" 
+                            name="warrantyExpiry" 
+                            class="form-control" 
+                            value="{{formatDateInput asset.warrantyExpiry}}"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input 
+                            type="text" 
+                            id="location" 
+                            name="location" 
+                            class="form-control" 
+                            placeholder="e.g., Building A, Floor 3, Room 301"
+                            value="{{asset.location}}"
+                        >
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="specifications">Specifications</label>
+                    <textarea 
+                        id="specifications" 
+                        name="specifications" 
+                        class="form-control" 
+                        rows="4"
+                        placeholder="CPU: Intel Core i7-11800H&#10;RAM: 16GB DDR4&#10;Storage: 512GB NVMe SSD&#10;Display: 15.6&quot; FHD"
+                    >{{asset.specifications}}</textarea>
+                    <small class="form-help">Enter technical specifications (one per line)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea 
+                        id="notes" 
+                        name="notes" 
+                        class="form-control" 
+                        rows="3"
+                        placeholder="Additional notes or comments..."
+                    >{{asset.notes}}</textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> {{#if asset}}Update Asset{{else}}Create Asset{{/if}}
+                    </button>
+                    <a href="/assets" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('asset-form');
+    
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Clear previous errors
+        document.querySelectorAll('.form-error').forEach(el => el.textContent = '');
+        document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
+        
+        // Validate required fields
+        const requiredFields = ['serialNumber', 'brand', 'model', 'category', 'status', 'dateAcquired'];
+        
+        requiredFields.forEach(fieldName => {
+            const field = document.getElementById(fieldName);
+            if (!field.value.trim()) {
+                showError(field, 'This field is required');
+                isValid = false;
+            }
+        });
+        
+        // Validate serial number format (alphanumeric)
+        const serialNumber = document.getElementById('serialNumber');
+        if (serialNumber.value && !/^[A-Za-z0-9-]+$/.test(serialNumber.value)) {
+            showError(serialNumber, 'Serial number can only contain letters, numbers, and hyphens');
+            isValid = false;
+        }
+        
+        // Validate date acquired (not in future)
+        const dateAcquired = document.getElementById('dateAcquired');
+        if (dateAcquired.value) {
+            const acquired = new Date(dateAcquired.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (acquired > today) {
+                showError(dateAcquired, 'Date acquired cannot be in the future');
+                isValid = false;
+            }
+        }
+        
+        // Validate warranty expiry (must be after date acquired)
+        const warrantyExpiry = document.getElementById('warrantyExpiry');
+        if (warrantyExpiry.value && dateAcquired.value) {
+            const warranty = new Date(warrantyExpiry.value);
+            const acquired = new Date(dateAcquired.value);
+            
+            if (warranty < acquired) {
+                showError(warrantyExpiry, 'Warranty expiry must be after date acquired');
+                isValid = false;
+            }
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            // Scroll to first error
+            const firstError = document.querySelector('.invalid');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+    
+    function showError(field, message) {
+        field.classList.add('invalid');
+        const errorElement = field.parentElement.querySelector('.form-error');
+        if (errorElement) {
+            errorElement.textContent = message;
+        }
+    }
+});
+</script>

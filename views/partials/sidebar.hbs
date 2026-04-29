@@ -1,1 +1,80 @@
-
+<aside class="sidebar">
+    <nav class="sidebar-nav">
+        <a href="/dashboard" class="sidebar-item {{#ifEquals activePage 'dashboard'}}active{{/ifEquals}}">
+            <i class="fas fa-chart-line"></i>
+            <span>Dashboard</span>
+        </a>
+        
+        <div class="sidebar-section">
+            <h3 class="sidebar-section-title">Inventory</h3>
+            <a href="/assets" class="sidebar-item {{#ifEquals activePage 'assets'}}active{{/ifEquals}}">
+                <i class="fas fa-laptop"></i>
+                <span>All Assets</span>
+            </a>
+            <a href="/assets/new" class="sidebar-item {{#ifEquals activePage 'assets-new'}}active{{/ifEquals}}">
+                <i class="fas fa-plus-circle"></i>
+                <span>Add Asset</span>
+            </a>
+        </div>
+        
+        <div class="sidebar-section">
+            <h3 class="sidebar-section-title">Operations</h3>
+            <a href="/assignments" class="sidebar-item {{#ifEquals activePage 'assignments'}}active{{/ifEquals}}">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Assignments</span>
+            </a>
+            <a href="/assignments/checkout" class="sidebar-item {{#ifEquals activePage 'checkout'}}active{{/ifEquals}}">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Check Out</span>
+            </a>
+            <a href="/assignments/checkin" class="sidebar-item {{#ifEquals activePage 'checkin'}}active{{/ifEquals}}">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>Check In</span>
+            </a>
+            <a href="/maintenance" class="sidebar-item {{#ifEquals activePage 'maintenance'}}active{{/ifEquals}}">
+                <i class="fas fa-tools"></i>
+                <span>Maintenance</span>
+            </a>
+        </div>
+        
+        <div class="sidebar-section">
+            <h3 class="sidebar-section-title">Reports</h3>
+            <a href="/reports" class="sidebar-item {{#ifEquals activePage 'reports'}}active{{/ifEquals}}">
+                <i class="fas fa-file-alt"></i>
+                <span>All Reports</span>
+            </a>
+            <a href="/reports/status" class="sidebar-item">
+                <i class="fas fa-clipboard-check"></i>
+                <span>Status Summary</span>
+            </a>
+            <a href="/reports/aging" class="sidebar-item">
+                <i class="fas fa-clock"></i>
+                <span>Asset Aging</span>
+            </a>
+        </div>
+        
+        {{#if (isAdmin user.role)}}
+        <div class="sidebar-section">
+            <h3 class="sidebar-section-title">Administration</h3>
+            <a href="/users" class="sidebar-item {{#ifEquals activePage 'users'}}active{{/ifEquals}}">
+                <i class="fas fa-users"></i>
+                <span>User Management</span>
+            </a>
+            <a href="/api-keys" class="sidebar-item {{#ifEquals activePage 'api-keys'}}active{{/ifEquals}}">
+                <i class="fas fa-key"></i>
+                <span>API Keys</span>
+            </a>
+            <a href="/audit-logs" class="sidebar-item {{#ifEquals activePage 'audit-logs'}}active{{/ifEquals}}">
+                <i class="fas fa-history"></i>
+                <span>Audit Logs</span>
+            </a>
+        </div>
+        {{/if}}
+    </nav>
+    
+    <div class="sidebar-footer">
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+    </div>
+</aside>

@@ -1,1 +1,51 @@
-
+{{#if pagination}}
+<div class="pagination-container">
+    <div class="pagination-info">
+        Showing {{pagination.startItem}} to {{pagination.endItem}} of {{pagination.totalItems}} entries
+    </div>
+    
+    <nav class="pagination" aria-label="Pagination">
+        {{#if pagination.hasPrevious}}
+            <a href="?page=1{{#if query}}&{{query}}{{/if}}" class="pagination-btn" aria-label="First page">
+                <i class="fas fa-angle-double-left"></i>
+            </a>
+            <a href="?page={{pagination.previousPage}}{{#if query}}&{{query}}{{/if}}" class="pagination-btn" aria-label="Previous page">
+                <i class="fas fa-angle-left"></i>
+            </a>
+        {{else}}
+            <span class="pagination-btn disabled">
+                <i class="fas fa-angle-double-left"></i>
+            </span>
+            <span class="pagination-btn disabled">
+                <i class="fas fa-angle-left"></i>
+            </span>
+        {{/if}}
+        
+        {{#each pagination.pages}}
+            {{#if this.isCurrent}}
+                <span class="pagination-number active">{{this.number}}</span>
+            {{else if this.isEllipsis}}
+                <span class="pagination-ellipsis">...</span>
+            {{else}}
+                <a href="?page={{this.number}}{{#if ../query}}&{{../query}}{{/if}}" class="pagination-number">{{this.number}}</a>
+            {{/if}}
+        {{/each}}
+        
+        {{#if pagination.hasNext}}
+            <a href="?page={{pagination.nextPage}}{{#if query}}&{{query}}{{/if}}" class="pagination-btn" aria-label="Next page">
+                <i class="fas fa-angle-right"></i>
+            </a>
+            <a href="?page={{pagination.totalPages}}{{#if query}}&{{query}}{{/if}}" class="pagination-btn" aria-label="Last page">
+                <i class="fas fa-angle-double-right"></i>
+            </a>
+        {{else}}
+            <span class="pagination-btn disabled">
+                <i class="fas fa-angle-right"></i>
+            </span>
+            <span class="pagination-btn disabled">
+                <i class="fas fa-angle-double-right"></i>
+            </span>
+        {{/if}}
+    </nav>
+</div>
+{{/if}}

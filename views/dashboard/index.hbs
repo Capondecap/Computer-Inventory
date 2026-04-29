@@ -1,1 +1,264 @@
+<div class="dashboard">
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card stat-primary">
+            <div class="stat-icon">
+                <i class="fas fa-laptop"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{stats.totalAssets}}</h3>
+                <p>Total Assets</p>
+            </div>
+            <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i> {{stats.assetsChange}}%
+            </div>
+        </div>
+        
+        <div class="stat-card stat-success">
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{stats.availableAssets}}</h3>
+                <p>Available</p>
+            </div>
+            <div class="stat-percentage">
+                {{stats.availablePercentage}}% of total
+            </div>
+        </div>
+        
+        <div class="stat-card stat-warning">
+            <div class="stat-icon">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{stats.assignedAssets}}</h3>
+                <p>In Use</p>
+            </div>
+            <div class="stat-percentage">
+                {{stats.assignedPercentage}}% of total
+            </div>
+        </div>
+        
+        <div class="stat-card stat-danger">
+            <div class="stat-icon">
+                <i class="fas fa-tools"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{stats.maintenanceAssets}}</h3>
+                <p>Maintenance</p>
+            </div>
+            <div class="stat-change negative">
+                <i class="fas fa-exclamation-triangle"></i> Attention needed
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Row -->
+    <div class="dashboard-row">
+        <div class="dashboard-card chart-card">
+            <div class="card-header">
+                <h3>Asset Distribution by Category</h3>
+                <div class="card-actions">
+                    <button class="btn-icon" aria-label="Refresh">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="dashboard-card chart-card">
+            <div class="card-header">
+                <h3>Asset Status Overview</h3>
+                <div class="card-actions">
+                    <button class="btn-icon" aria-label="Refresh">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activity and Quick Actions -->
+    <div class="dashboard-row">
+        <div class="dashboard-card activity-card">
+            <div class="card-header">
+                <h3>Recent Activity</h3>
+                <a href="/audit-logs" class="card-link">View all <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="card-body">
+                {{#if recentActivity}}
+                <div class="activity-list">
+                    {{#each recentActivity}}
+                    <div class="activity-item">
+                        <div class="activity-icon {{this.type}}">
+                            <i class="fas {{this.icon}}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-text">{{this.description}}</p>
+                            <span class="activity-meta">
+                                <span class="activity-user">{{this.user}}</span>
+                                <span class="activity-time">{{formatDate this.timestamp}}</span>
+                            </span>
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+                {{else}}
+                <div class="empty-state">
+                    <i class="fas fa-history"></i>
+                    <p>No recent activity</p>
+                </div>
+                {{/if}}
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3>Quick Actions</h3>
+            </div>
+            <div class="card-body">
+                <div class="quick-actions">
+                    <a href="/assets/new" class="quick-action-btn">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Add New Asset</span>
+                    </a>
+                    <a href="/assignments/checkout" class="quick-action-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Check Out Asset</span>
+                    </a>
+                    <a href="/assignments/checkin" class="quick-action-btn">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Check In Asset</span>
+                    </a>
+                    <a href="/reports" class="quick-action-btn">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Generate Report</span>
+                    </a>
+                    {{#if (isAdmin user.role)}}
+                    <a href="/users/new" class="quick-action-btn">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Add User</span>
+                    </a>
+                    <a href="/api-keys" class="quick-action-btn">
+                        <i class="fas fa-key"></i>
+                        <span>Manage API Keys</span>
+                    </a>
+                    {{/if}}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Alerts Section -->
+    {{#if alerts}}
+    <div class="dashboard-card alerts-card">
+        <div class="card-header">
+            <h3>Alerts & Notifications</h3>
+        </div>
+        <div class="card-body">
+            <div class="alerts-list">
+                {{#each alerts}}
+                <div class="alert-item alert-{{this.level}}">
+                    <div class="alert-icon">
+                        <i class="fas {{this.icon}}"></i>
+                    </div>
+                    <div class="alert-content">
+                        <p>{{this.message}}</p>
+                        {{#if this.action}}
+                        <a href="{{this.actionLink}}" class="alert-action">{{this.action}}</a>
+                        {{/if}}
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+    </div>
+    {{/if}}
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Category Distribution Chart
+    const categoryCtx = document.getElementById('categoryChart');
+    if (categoryCtx) {
+        new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{{json categoryLabels}}},
+                datasets: [{
+                    data: {{{json categoryData}}},
+                    backgroundColor: [
+                        '#4F46E5',
+                        '#10B981',
+                        '#F59E0B',
+                        '#EF4444',
+                        '#8B5CF6',
+                        '#06B6D4'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            usePointStyle: true
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Status Overview Chart
+    const statusCtx = document.getElementById('statusChart');
+    if (statusCtx) {
+        new Chart(statusCtx, {
+            type: 'bar',
+            data: {
+                labels: {{{json statusLabels}}},
+                datasets: [{
+                    label: 'Assets',
+                    data: {{{json statusData}}},
+                    backgroundColor: [
+                        '#10B981',
+                        '#F59E0B',
+                        '#EF4444',
+                        '#6B7280'
+                    ],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>

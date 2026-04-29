@@ -1,1 +1,236 @@
+<div class="page-actions">
+    <a href="/assets" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Assets
+    </a>
+    <div class="btn-group">
+        <a href="/assets/{{asset._id}}/edit" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Edit
+        </a>
+        {{#if (canCheckout asset.status)}}
+        <a href="/assignments/checkout?assetId={{asset._id}}" class="btn btn-success">
+            <i class="fas fa-sign-out-alt"></i> Check Out
+        </a>
+        {{/if}}
+        {{#if (isAdmin user.role)}}
+        <button class="btn btn-danger" onclick="deleteAsset('{{asset._id}}')">
+            <i class="fas fa-trash"></i> Delete
+        </button>
+        {{/if}}
+    </div>
+</div>
 
+<div class="detail-view">
+    <!-- Asset Information Card -->
+    <div class="detail-card">
+        <div class="card-header">
+            <h2>Asset Information</h2>
+            <span class="badge badge-{{getStatusClass asset.status}} badge-lg">
+                {{asset.status}}
+            </span>
+        </div>
+        <div class="card-body">
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Asset ID</label>
+                    <div class="detail-value">
+                        <strong>{{asset.assetId}}</strong>
+                    </div>
+                </div>
+                
+                <div class="detail-item">
+                    <label>Serial Number</label>
+                    <div class="detail-value">
+                        <code>{{asset.serialNumber}}</code>
+                        <button class="btn-icon-sm" onclick="copyToClipboard('{{asset.serialNumber}}')" title="Copy">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="detail-item">
+                    <label>Model</label>
+                    <div class="detail-value">{{asset.model}}</div>
+                </div>
+                
+                <div class="detail-item">
+                    <label>Brand</label>
+                    <div class="detail-value">{{asset.brand}}</div>
+                </div>
+                
+                <div class="detail-item">
+                    <label>Category</label>
+                    <div class="detail-value">
+                        <span class="badge badge-category">
+                            <i class="fas {{getCategoryIcon asset.category}}"></i>
+                            {{asset.category}}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="detail-item">
+                    <label>Date Acquired</label>
+                    <div class="detail-value">{{formatDate asset.dateAcquired}}</div>
+                </div>
+                
+                {{#if asset.purchasePrice}}
+                <div class="detail-item">
+                    <label>Purchase Price</label>
+                    <div class="detail-value">${{asset.purchasePrice}}</div>
+                </div>
+                {{/if}}
+                
+                {{#if asset.warrantyExpiry}}
+                <div class="detail-item">
+                    <label>Warranty Expiry</label>
+                    <div class="detail-value {{#if (isExpired asset.warrantyExpiry)}}text-danger{{/if}}">
+                        {{formatDate asset.warrantyExpiry}}
+                        {{#if (isExpired asset.warrantyExpiry)}}
+                            <span class="badge badge-danger">Expired</span>
+                        {{/if}}
+                    </div>
+                </div>
+                {{/if}}
+                
+                {{#if asset.specifications}}
+                <div class="detail-item full-width">
+                    <label>Specifications</label>
+                    <div class="detail-value">
+                        <pre class="spec-block">{{asset.specifications}}</pre>
+                    </div>
+                </div>
+                {{/if}}
+                
+                {{#if asset.notes}}
+                <div class="detail-item full-width">
+                    <label>Notes</label>
+                    <div class="detail-value">{{asset.notes}}</div>
+                </div>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Current Assignment (if any) -->
+    {{#if currentAssignment}}
+    <div class="detail-card">
+        <div class="card-header">
+            <h2>Current Assignment</h2>
+        </div>
+        <div class="card-body">
+            <div class="assignment-info">
+                <div class="assignment-user">
+                    <div class="user-avatar-lg">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <h3>{{currentAssignment.user.name}}</h3>
+                        <p>{{currentAssignment.user.email}}</p>
+                        <span class="badge badge-info">{{currentAssignment.user.department}}</span>
+                    </div>
+                </div>
+                <div class="assignment-details">
+                    <div class="detail-item">
+                        <label>Checked Out</label>
+                        <div class="detail-value">{{formatDate currentAssignment.checkoutDate}}</div>
+                    </div>
+                    <div class="detail-item">
+                        <label>Duration</label>
+                        <div class="detail-value">{{getDuration currentAssignment.checkoutDate}}</div>
+                    </div>
+                    {{#if currentAssignment.document}}
+                    <div class="detail-item">
+                        <label>Reference Document</label>
+                        <div class="detail-value">
+                            <a href="/uploads/{{currentAssignment.document}}" target="_blank" class="doc-link">
+                                <i class="fas fa-file-pdf"></i> View Document
+                            </a>
+                        </div>
+                    </div>
+                    {{/if}}
+                </div>
+                <a href="/assignments/checkin?assetId={{asset._id}}" class="btn btn-warning btn-block">
+                    <i class="fas fa-sign-in-alt"></i> Check In Asset
+                </a>
+            </div>
+        </div>
+    </div>
+    {{/if}}
+    
+    <!-- Assignment History -->
+    <div class="detail-card">
+        <div class="card-header">
+            <h2>Assignment History</h2>
+            <a href="/assets/{{asset._id}}/history" class="card-link">
+                View Full History <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        <div class="card-body">
+            {{#if history.length}}
+            <div class="timeline">
+                {{#each history}}
+                <div class="timeline-item">
+                    <div class="timeline-marker {{this.type}}">
+                        <i class="fas {{#ifEquals this.type 'checkout'}}fa-sign-out-alt{{else}}fa-sign-in-alt{{/ifEquals}}"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="timeline-header">
+                            <h4>{{#ifEquals this.type 'checkout'}}Checked Out{{else}}Checked In{{/ifEquals}}</h4>
+                            <span class="timeline-date">{{formatDate this.date}}</span>
+                        </div>
+                        <p class="timeline-user">
+                            {{#ifEquals this.type 'checkout'}}Assigned to{{else}}Returned by{{/ifEquals}} 
+                            <strong>{{this.user.name}}</strong>
+                        </p>
+                        {{#if this.notes}}
+                        <p class="timeline-notes">{{this.notes}}</p>
+                        {{/if}}
+                        {{#if this.document}}
+                        <a href="/uploads/{{this.document}}" class="timeline-doc" target="_blank">
+                            <i class="fas fa-paperclip"></i> View Document
+                        </a>
+                        {{/if}}
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+            {{else}}
+            <div class="empty-state-sm">
+                <i class="fas fa-history"></i>
+                <p>No assignment history available</p>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        // Show toast notification
+        showToast('Copied to clipboard!', 'success');
+    });
+}
+
+function deleteAsset(id) {
+    if (confirm('Are you sure you want to delete this asset? This action cannot be undone.')) {
+        fetch(`/api/items/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '/assets';
+            } else {
+                alert('Error deleting asset: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error deleting asset');
+            console.error(error);
+        });
+    }
+}
+</script>

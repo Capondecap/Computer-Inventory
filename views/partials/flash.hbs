@@ -1,1 +1,51 @@
+{{#if success}}
+<div class="alert alert-success" role="alert">
+    <i class="fas fa-check-circle"></i>
+    <div class="alert-content">
+        <strong>Success!</strong>
+        <p>{{success}}</p>
+    </div>
+    <button class="alert-close" aria-label="Close alert">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
+{{/if}}
 
+{{#if error}}
+<div class="alert alert-error" role="alert">
+    <i class="fas fa-exclamation-circle"></i>
+    <div class="alert-content">
+        <strong>Error!</strong>
+        <p>{{error}}</p>
+    </div>
+    <button class="alert-close" aria-label="Close alert">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
+{{/if}}
+
+{{#if warning}}
+<div class="alert alert-warning" role="alert">
+    <i class="fas fa-exclamation-triangle"></i>
+    <div class="alert-content">
+        <strong>Warning!</strong>
+        <p>{{warning}}</p>
+    </div>
+    <button class="alert-close" aria-label="Close alert">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
+{{/if}}
+
+{{#if info}}
+<div class="alert alert-info" role="alert">
+    <i class="fas fa-info-circle"></i>
+    <div class="alert-content">
+        <strong>Info</strong>
+        <p>{{info}}</p>
+    </div>
+    <button class="alert-close" aria-label="Close alert">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
+{{/if}}

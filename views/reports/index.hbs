@@ -1,1 +1,346 @@
+<div class="reports-header">
+    <div class="report-tabs">
+        <a href="/reports/status" class="tab {{#ifEquals reportType 'status'}}active{{/ifEquals}}">
+            <i class="fas fa-clipboard-check"></i>
+            Status Summary
+        </a>
+        <a href="/reports/aging" class="tab {{#ifEquals reportType 'aging'}}active{{/ifEquals}}">
+            <i class="fas fa-clock"></i>
+            Asset Aging
+        </a>
+        <a href="/reports/user-audit" class="tab {{#ifEquals reportType 'user-audit'}}active{{/ifEquals}}">
+            <i class="fas fa-user-check"></i>
+            User Audit
+        </a>
+        <a href="/reports/maintenance" class="tab {{#ifEquals reportType 'maintenance'}}active{{/ifEquals}}">
+            <i class="fas fa-tools"></i>
+            Maintenance
+        </a>
+    </div>
+    
+    <button class="btn btn-primary" onclick="exportReport()">
+        <i class="fas fa-file-export"></i> Export Report
+    </button>
+</div>
 
+<!-- Status Summary Report -->
+{{#ifEquals reportType 'status'}}
+<div class="report-section">
+    <div class="stats-grid">
+        <div class="stat-card stat-primary">
+            <div class="stat-icon"><i class="fas fa-laptop"></i></div>
+            <div class="stat-content">
+                <h3>{{report.total}}</h3>
+                <p>Total Assets</p>
+            </div>
+        </div>
+        
+        <div class="stat-card stat-success">
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-content">
+                <h3>{{report.available}}</h3>
+                <p>Available</p>
+            </div>
+            <div class="stat-percentage">{{percentage report.available report.total}}%</div>
+        </div>
+        
+        <div class="stat-card stat-warning">
+            <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+            <div class="stat-content">
+                <h3>{{report.inUse}}</h3>
+                <p>In Use</p>
+            </div>
+            <div class="stat-percentage">{{percentage report.inUse report.total}}%</div>
+        </div>
+        
+        <div class="stat-card stat-danger">
+            <div class="stat-icon"><i class="fas fa-tools"></i></div>
+            <div class="stat-content">
+                <h3>{{report.maintenance}}</h3>
+                <p>Maintenance</p>
+            </div>
+            <div class="stat-percentage">{{percentage report.maintenance report.total}}%</div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h3>Assets by Category</h3>
+        </div>
+        <div class="card-body">
+            <div class="category-breakdown">
+                {{#each report.byCategory}}
+                <div class="category-item">
+                    <div class="category-header">
+                        <span class="category-name">
+                            <i class="fas {{getCategoryIcon this.category}}"></i>
+                            {{this.category}}
+                        </span>
+                        <span class="category-count">{{this.count}} assets</span>
+                    </div>
+                    <div class="category-bar">
+                        <div class="bar-fill" style="width: {{percentage this.count ../report.total}}%"></div>
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+    </div>
+</div>
+{{/ifEquals}}
+
+<!-- Asset Aging Report -->
+{{#ifEquals reportType 'aging'}}
+<div class="report-section">
+    <div class="filter-panel">
+        <form action="/reports/aging" method="GET" class="filter-form">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Age Threshold (years)</label>
+                    <select name="threshold" class="form-control">
+                        <option value="1" {{#ifEquals query.threshold '1'}}selected{{/ifEquals}}>1+ years</option>
+                        <option value="2" {{#ifEquals query.threshold '2'}}selected{{/ifEquals}}>2+ years</option>
+                        <option value="3" {{#ifEquals query.threshold '3'}}selected{{/ifEquals}}>3+ years</option>
+                        <option value="5" {{#ifEquals query.threshold '5'}}selected{{/ifEquals}}>5+ years</option>
+                    </select>
+                </div>
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-primary">Apply</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h3>Assets Older Than {{query.threshold}} Years</h3>
+            <span class="badge badge-info badge-lg">{{report.assets.length}} items</span>
+        </div>
+        <div class="card-body">
+            {{#if report.assets.length}}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Asset ID</th>
+                            <th>Category</th>
+                            <th>Model</th>
+                            <th>Date Acquired</th>
+                            <th>Age</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each report.assets}}
+                        <tr>
+                            <td><a href="/assets/{{this._id}}">{{this.assetId}}</a></td>
+                            <td>
+                                <span class="badge badge-category">
+                                    <i class="fas {{getCategoryIcon this.category}}"></i>
+                                    {{this.category}}
+                                </span>
+                            </td>
+                            <td>{{this.brand}} {{this.model}}</td>
+                            <td>{{formatDate this.dateAcquired}}</td>
+                            <td><strong>{{this.age}} years</strong></td>
+                            <td>
+                                <span class="badge badge-{{getStatusClass this.status}}">
+                                    {{this.status}}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="/assets/{{this._id}}" class="btn-icon">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+            {{else}}
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>No assets found matching this criteria</p>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+</div>
+{{/ifEquals}}
+
+<!-- User Audit Report -->
+{{#ifEquals reportType 'user-audit'}}
+<div class="report-section">
+    <div class="filter-panel">
+        <form action="/reports/user-audit" method="GET" class="filter-form">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Select User</label>
+                    <select name="userId" class="form-control" required>
+                        <option value="">Choose a user...</option>
+                        {{#each users}}
+                        <option value="{{this._id}}" {{#ifEquals this._id ../query.userId}}selected{{/ifEquals}}>
+                            {{this.name}} ({{this.email}})
+                        </option>
+                        {{/each}}
+                    </select>
+                </div>
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-primary">View Assets</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    {{#if report}}
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h3>Assets Assigned to {{report.user.name}}</h3>
+                <p class="card-subtitle">{{report.user.email}}</p>
+            </div>
+            <span class="badge badge-warning badge-lg">{{report.assets.length}} active</span>
+        </div>
+        <div class="card-body">
+            {{#if report.assets.length}}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Asset ID</th>
+                            <th>Category</th>
+                            <th>Model</th>
+                            <th>Serial Number</th>
+                            <th>Checked Out</th>
+                            <th>Duration</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each report.assets}}
+                        <tr>
+                            <td><a href="/assets/{{this._id}}">{{this.assetId}}</a></td>
+                            <td>
+                                <span class="badge badge-category">
+                                    <i class="fas {{getCategoryIcon this.category}}"></i>
+                                    {{this.category}}
+                                </span>
+                            </td>
+                            <td>{{this.brand}} {{this.model}}</td>
+                            <td><code class="serial-number">{{this.serialNumber}}</code></td>
+                            <td>{{formatDate this.checkoutDate}}</td>
+                            <td>{{getDuration this.checkoutDate}}</td>
+                            <td>
+                                <a href="/assets/{{this._id}}" class="btn-icon" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="/assignments/checkin?assetId={{this._id}}" class="btn-icon" title="Check In">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+            {{else}}
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>No assets currently assigned to this user</p>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+    {{/if}}
+</div>
+{{/ifEquals}}
+
+<style>
+.reports-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.report-tabs {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.tab {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    color: var(--text-secondary);
+    background: white;
+    transition: all var(--transition-fast);
+}
+
+.tab:hover {
+    background: var(--color-gray-50);
+    color: var(--text-primary);
+}
+
+.tab.active {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+.category-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.category-item {
+    padding: 0.75rem 0;
+}
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.category-name {
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.category-count {
+    color: var(--text-secondary);
+}
+
+.category-bar {
+    height: 8px;
+    background: var(--color-gray-100);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+    transition: width 0.3s ease;
+}
+</style>
+
+<script>
+function exportReport() {
+    const reportType = '{{reportType}}';
+    const params = new URLSearchParams(window.location.search);
+    window.location.href = `/api/reports/${reportType}/export?${params.toString()}`;
+}
+</script>

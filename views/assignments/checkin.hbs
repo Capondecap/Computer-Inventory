@@ -1,0 +1,372 @@
+<div class="page-actions">
+    <a href="/assignments" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Assignments
+    </a>
+</div>
+
+<div class="form-container">
+    <div class="card">
+        <div class="card-header">
+            <h2>
+                <i class="fas fa-sign-in-alt"></i>
+                Check In Asset
+            </h2>
+            <p class="card-subtitle">Return an asset and update its status</p>
+        </div>
+        <div class="card-body">
+            <form action="/assignments/checkin" method="POST" id="checkin-form" enctype="multipart/form-data" novalidate>
+                <!-- Asset Selection -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-laptop"></i> Select Asset to Check In
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="assetSearch" class="required">Search Assigned Asset</label>
+                        <div class="search-input-group">
+                            <input 
+                                type="text" 
+                                id="assetSearch" 
+                                class="form-control" 
+                                placeholder="Search by serial number, model, or asset ID..."
+                                autocomplete="off"
+                            >
+                            <i class="fas fa-search search-icon"></i>
+                        </div>
+                        <div id="assetSearchResults" class="search-results"></div>
+                        <input type="hidden" id="assetId" name="assetId" required>
+                        <span class="form-error"></span>
+                    </div>
+                    
+                    <div id="selectedAsset" class="selected-item" style="display: none;">
+                        <div class="item-header">
+                            <h4>Selected Asset</h4>
+                            <button type="button" class="btn-link" onclick="clearAssetSelection()">
+                                <i class="fas fa-times"></i> Change
+                            </button>
+                        </div>
+                        <div class="item-details">
+                            <div class="item-icon">
+                                <i class="fas fa-laptop"></i>
+                            </div>
+                            <div class="item-info">
+                                <strong id="selectedAssetName"></strong>
+                                <p id="selectedAssetDetails"></p>
+                                <div class="assignment-info">
+                                    <span class="info-label">Assigned to:</span>
+                                    <strong id="assignedUser"></strong>
+                                </div>
+                                <div class="assignment-info">
+                                    <span class="info-label">Checked out:</span>
+                                    <span id="checkoutDate"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Check-in Details -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-clipboard-check"></i> Check-in Details
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="checkinDate" class="required">Check-in Date</label>
+                            <input 
+                                type="date" 
+                                id="checkinDate" 
+                                name="checkinDate" 
+                                class="form-control" 
+                                value="{{getCurrentDate}}"
+                                max="{{getCurrentDate}}"
+                                required
+                            >
+                            <span class="form-error"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="condition" class="required">Asset Condition</label>
+                            <select id="condition" name="condition" class="form-control" required>
+                                <option value="">Select Condition</option>
+                                <option value="Good">Good - No issues</option>
+                                <option value="Fair">Fair - Minor wear</option>
+                                <option value="Damaged">Damaged - Needs repair</option>
+                                <option value="Faulty">Faulty - Not working</option>
+                            </select>
+                            <span class="form-error"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newStatus" class="required">New Asset Status</label>
+                        <select id="newStatus" name="newStatus" class="form-control" required>
+                            <option value="Available">Available</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Retired">Retired</option>
+                        </select>
+                        <small class="form-help">Set to "Maintenance" if repairs are needed</small>
+                        <span class="form-error"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes">Inspection Notes</label>
+                        <textarea 
+                            id="notes" 
+                            name="notes" 
+                            class="form-control" 
+                            rows="4"
+                            placeholder="Document any damage, missing items, or issues found during inspection..."
+                        ></textarea>
+                        <small class="form-help">Include details about physical condition, functionality, accessories, etc.</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="document">Inspection Document</label>
+                        <div class="file-upload-area" id="fileUploadArea">
+                            <input 
+                                type="file" 
+                                id="document" 
+                                name="document" 
+                                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                                style="display: none;"
+                            >
+                            <div class="upload-placeholder">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Click to upload or drag and drop</p>
+                                <small>PDF, DOC, DOCX, PNG, JPG (Max 5MB)</small>
+                            </div>
+                            <div class="upload-preview" style="display: none;">
+                                <i class="fas fa-file"></i>
+                                <span class="file-name"></span>
+                                <button type="button" class="btn-icon-sm" onclick="clearFile()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <small class="form-help">Upload photos of damage or inspection report</small>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-sign-in-alt"></i> Check In Asset
+                    </button>
+                    <a href="/assignments" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.search-input-group {
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-gray-400);
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 10;
+    box-shadow: var(--shadow-md);
+    display: none;
+}
+
+.search-results.show {
+    display: block;
+}
+
+.search-result-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover {
+    background-color: var(--color-gray-50);
+}
+
+.result-title {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.result-details {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.selected-item {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: var(--color-gray-50);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--border-radius);
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.item-header h4 {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.item-details {
+    display: flex;
+    gap: 1rem;
+}
+
+.item-icon {
+    width: 60px;
+    height: 60px;
+    background-color: var(--color-primary);
+    color: white;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.item-info {
+    flex: 1;
+}
+
+.item-info strong {
+    display: block;
+    font-size: 1.125rem;
+    margin-bottom: 0.25rem;
+}
+
+.item-info p {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.assignment-info {
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.info-label {
+    color: var(--text-secondary);
+    margin-right: 0.5rem;
+}
+</style>
+
+<script>
+let searchTimeout;
+const assetSearchInput = document.getElementById('assetSearch');
+const assetSearchResults = document.getElementById('assetSearchResults');
+const assetIdInput = document.getElementById('assetId');
+const selectedAssetDiv = document.getElementById('selectedAsset');
+
+// Search for assigned assets
+assetSearchInput?.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    const query = this.value.trim();
+    
+    if (query.length < 2) {
+        assetSearchResults.classList.remove('show');
+        return;
+    }
+    
+    searchTimeout = setTimeout(() => {
+        searchAssets(query);
+    }, 300);
+});
+
+async function searchAssets(query) {
+    try {
+        const response = await api.get(`/api/items/search?q=${encodeURIComponent(query)}&status=In-Use`);
+        displaySearchResults(response.items || []);
+    } catch (error) {
+        console.error('Search failed:', error);
+    }
+}
+
+function displaySearchResults(items) {
+    if (items.length === 0) {
+        assetSearchResults.innerHTML = '<div class="search-result-item"><p class="result-details">No assigned assets found</p></div>';
+        assetSearchResults.classList.add('show');
+        return;
+    }
+    
+    assetSearchResults.innerHTML = items.map(item => `
+        <div class="search-result-item" onclick="selectAsset('${item._id}', '${item.assetId}', '${item.brand} ${item.model}', '${item.serialNumber}', '${item.assignedTo?.name || 'Unknown'}', '${item.checkoutDate || ''}')">
+            <div class="result-title">${item.assetId} - ${item.brand} ${item.model}</div>
+            <div class="result-details">
+                SN: ${item.serialNumber} | Assigned to: ${item.assignedTo?.name || 'Unknown'}
+            </div>
+        </div>
+    `).join('');
+    
+    assetSearchResults.classList.add('show');
+}
+
+function selectAsset(id, assetId, name, serial, assignedUser, checkoutDate) {
+    assetIdInput.value = id;
+    document.getElementById('selectedAssetName').textContent = assetId;
+    document.getElementById('selectedAssetDetails').textContent = `Serial: ${serial}`;
+    document.getElementById('assignedUser').textContent = assignedUser;
+    document.getElementById('checkoutDate').textContent = new Date(checkoutDate).toLocaleDateString();
+    
+    selectedAssetDiv.style.display = 'block';
+    assetSearchInput.value = assetId;
+    assetSearchResults.classList.remove('show');
+}
+
+function clearAssetSelection() {
+    assetIdInput.value = '';
+    assetSearchInput.value = '';
+    selectedAssetDiv.style.display = 'none';
+}
+
+// Close search results when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.search-input-group')) {
+        assetSearchResults.classList.remove('show');
+    }
+});
+
+// Auto-select status based on condition
+document.getElementById('condition')?.addEventListener('change', function() {
+    const statusSelect = document.getElementById('newStatus');
+    if (this.value === 'Damaged' || this.value === 'Faulty') {
+        statusSelect.value = 'Maintenance';
+    } else {
+        statusSelect.value = 'Available';
+    }
+});
+</script>

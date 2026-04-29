@@ -1,0 +1,186 @@
+<div class="page-actions">
+    <a href="/assignments" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Assignments
+    </a>
+</div>
+
+<div class="form-container">
+    <div class="card">
+        <div class="card-header">
+            <h2>
+                <i class="fas fa-sign-out-alt"></i>
+                Check Out Asset
+            </h2>
+            <p class="card-subtitle">Assign an asset to a user</p>
+        </div>
+        <div class="card-body">
+            <form action="/assignments/checkout" method="POST" id="checkout-form" enctype="multipart/form-data" novalidate>
+                <!-- Asset Selection -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-laptop"></i> Select Asset
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="assetSearch" class="required">Search Asset</label>
+                        <div class="search-input-group">
+                            <input 
+                                type="text" 
+                                id="assetSearch" 
+                                class="form-control" 
+                                placeholder="Search by serial number, model, or asset ID..."
+                                autocomplete="off"
+                            >
+                            <i class="fas fa-search search-icon"></i>
+                        </div>
+                        <div id="assetSearchResults" class="search-results"></div>
+                        <input type="hidden" id="assetId" name="assetId" required>
+                        <span class="form-error"></span>
+                    </div>
+                    
+                    <div id="selectedAsset" class="selected-item" style="display: none;">
+                        <div class="item-header">
+                            <h4>Selected Asset</h4>
+                            <button type="button" class="btn-link" onclick="clearAssetSelection()">
+                                <i class="fas fa-times"></i> Change
+                            </button>
+                        </div>
+                        <div class="item-details">
+                            <div class="item-icon">
+                                <i class="fas fa-laptop"></i>
+                            </div>
+                            <div class="item-info">
+                                <strong id="selectedAssetName"></strong>
+                                <p id="selectedAssetDetails"></p>
+                                <span class="badge badge-success" id="selectedAssetStatus"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- User Selection -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-user"></i> Assign To User
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="userSearch" class="required">Search User</label>
+                        <div class="search-input-group">
+                            <input 
+                                type="text" 
+                                id="userSearch" 
+                                class="form-control" 
+                                placeholder="Search by name or email..."
+                                autocomplete="off"
+                            >
+                            <i class="fas fa-search search-icon"></i>
+                        </div>
+                        <div id="userSearchResults" class="search-results"></div>
+                        <input type="hidden" id="userId" name="userId" required>
+                        <span class="form-error"></span>
+                    </div>
+                    
+                    <div id="selectedUser" class="selected-item" style="display: none;">
+                        <div class="item-header">
+                            <h4>Selected User</h4>
+                            <button type="button" class="btn-link" onclick="clearUserSelection()">
+                                <i class="fas fa-times"></i> Change
+                            </button>
+                        </div>
+                        <div class="item-details">
+                            <div class="item-icon">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <div class="item-info">
+                                <strong id="selectedUserName"></strong>
+                                <p id="selectedUserEmail"></p>
+                                <span class="badge badge-info" id="selectedUserDept"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Assignment Details -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-info-circle"></i> Assignment Details
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="checkoutDate" class="required">Checkout Date</label>
+                            <input 
+                                type="date" 
+                                id="checkoutDate" 
+                                name="checkoutDate" 
+                                class="form-control" 
+                                value="{{getCurrentDate}}"
+                                max="{{getCurrentDate}}"
+                                required
+                            >
+                            <span class="form-error"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="expectedReturn">Expected Return Date</label>
+                            <input 
+                                type="date" 
+                                id="expectedReturn" 
+                                name="expectedReturn" 
+                                class="form-control"
+                                min="{{getCurrentDate}}"
+                            >
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes">Notes / Purpose</label>
+                        <textarea 
+                            id="notes" 
+                            name="notes" 
+                            class="form-control" 
+                            rows="3"
+                            placeholder="e.g., Remote work setup, Project assignment, Replacement device..."
+                        ></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="document">Reference Document</label>
+                        <div class="file-upload-area" id="fileUploadArea">
+                            <input 
+                                type="file" 
+                                id="document" 
+                                name="document" 
+                                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                                style="display: none;"
+                            >
+                            <div class="upload-placeholder">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Click to upload or drag and drop</p>
+                                <small>PDF, DOC, DOCX, PNG, JPG (Max 5MB)</small>
+                            </div>
+                            <div class="upload-preview" style="display: none;">
+                                <i class="fas fa-file"></i>
+                                <span class="file-name"></span>
+                                <button type="button" class="btn-icon-sm" onclick="clearFile()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <small class="form-help">Upload approval form, request ticket, or other reference document</small>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-sign-out-alt"></i> Check Out Asset
+                    </button>
+                    <a href="/assignments" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="/js/checkout.js"></script>

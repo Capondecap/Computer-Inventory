@@ -1,1 +1,54 @@
-
+<nav class="navbar">
+    <div class="navbar-brand">
+        <i class="fas fa-laptop-code"></i>
+        <span>Inventory System</span>
+    </div>
+    
+    <div class="navbar-menu">
+        <div class="navbar-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="global-search" placeholder="Search assets, users..." aria-label="Global search">
+        </div>
+        
+        <div class="navbar-actions">
+            <button class="navbar-icon-btn" id="notifications-btn" aria-label="Notifications">
+                <i class="fas fa-bell"></i>
+                {{#if unreadNotifications}}
+                    <span class="badge">{{unreadNotifications}}</span>
+                {{/if}}
+            </button>
+            
+            <div class="navbar-user">
+                <button class="user-menu-btn" id="user-menu-btn" aria-label="User menu">
+                    <div class="user-avatar">
+                        {{#if user.avatar}}
+                            <img src="{{user.avatar}}" alt="{{user.name}}">
+                        {{else}}
+                            <i class="fas fa-user"></i>
+                        {{/if}}
+                    </div>
+                    <span class="user-name">{{user.name}}</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                
+                <div class="user-dropdown" id="user-dropdown">
+                    <div class="user-dropdown-header">
+                        <strong>{{user.name}}</strong>
+                        <span class="user-role {{user.role}}">{{user.role}}</span>
+                    </div>
+                    <hr>
+                    <a href="/profile" class="dropdown-item">
+                        <i class="fas fa-user-circle"></i> Profile
+                    </a>
+                    <a href="/settings" class="dropdown-item">
+                        <i class="fas fa-cog"></i> Settings
+                    </a>
+                    <hr>
+                    <a href="/logout" class="dropdown-item logout">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>

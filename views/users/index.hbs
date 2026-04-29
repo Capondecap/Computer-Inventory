@@ -1,1 +1,442 @@
+<div class="page-actions">
+    <button class="btn btn-primary" onclick="openModal('newUserModal')">
+        <i class="fas fa-user-plus"></i> Add New User
+    </button>
+</div>
 
+<!-- Users Table -->
+<div class="card">
+    <div class="card-header">
+        <h3>All Users</h3>
+        <div class="card-actions">
+            <select id="roleFilter" class="form-control" style="width: 180px;">
+                <option value="">All Roles</option>
+                <option value="Admin">Admin</option>
+                <option value="Technician">Technician</option>
+            </select>
+        </div>
+    </div>
+    <div class="card-body">
+        {{#if users.length}}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Last Login</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each users}}
+                    <tr>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar-sm">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <strong>{{this.name}}</strong>
+                            </div>
+                        </td>
+                        <td>{{this.email}}</td>
+                        <td>
+                            <span class="user-role {{this.role}}">{{this.role}}</span>
+                        </td>
+                        <td>
+                            {{#if this.isActive}}
+                                <span class="badge badge-success">Active</span>
+                            {{else}}
+                                <span class="badge badge-danger">Disabled</span>
+                            {{/if}}
+                        </td>
+                        <td>{{formatDate this.createdAt}}</td>
+                        <td>
+                            {{#if this.lastLogin}}
+                                {{formatDateTime this.lastLogin}}
+                            {{else}}
+                                <span class="text-muted">Never</span>
+                            {{/if}}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon" onclick="editUser('{{this._id}}')" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon" onclick="changeRole('{{this._id}}')" title="Change Role">
+                                    <i class="fas fa-user-tag"></i>
+                                </button>
+                                {{#if this.isActive}}
+                                    <button class="btn-icon btn-warning" onclick="toggleUserStatus('{{this._id}}', false)" title="Disable">
+                                        <i class="fas fa-user-slash"></i>
+                                    </button>
+                                {{else}}
+                                    <button class="btn-icon btn-success" onclick="toggleUserStatus('{{this._id}}', true)" title="Enable">
+                                        <i class="fas fa-user-check"></i>
+                                    </button>
+                                {{/if}}
+                            </div>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+        {{else}}
+        <div class="empty-state">
+            <i class="fas fa-users"></i>
+            <h3>No users found</h3>
+            <p>Add a new user to get started.</p>
+        </div>
+        {{/if}}
+    </div>
+</div>
+
+<!-- New User Modal -->
+<div class="modal-overlay" id="newUserModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New User</h3>
+                <button class="modal-close" onclick="closeModal('newUserModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="newUserForm" onsubmit="createUser(event)">
+                    <div class="form-group">
+                        <label for="userName" class="required">Full Name</label>
+                        <input type="text" id="userName" name="name" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userEmail" class="required">Email Address</label>
+                        <input type="email" id="userEmail" name="email" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userPassword" class="required">Password</label>
+                        <div class="password-input-group">
+                            <input type="password" id="userPassword" name="password" class="form-control" required minlength="8">
+                            <button type="button" class="password-toggle" aria-label="Toggle password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <small class="form-help">Minimum 8 characters</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userRole" class="required">Role</label>
+                        <select id="userRole" name="role" class="form-control" required>
+                            <option value="">Select Role</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Technician">Technician</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userDepartment">Department</label>
+                        <input type="text" id="userDepartment" name="department" class="form-control" placeholder="e.g., IT, Engineering">
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('newUserModal')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i> Create User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal-overlay" id="editUserModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit User</h3>
+                <button class="modal-close" onclick="closeModal('editUserModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm" onsubmit="updateUser(event)">
+                    <input type="hidden" id="editUserId" name="userId">
+                    
+                    <div class="form-group">
+                        <label for="editUserName" class="required">Full Name</label>
+                        <input type="text" id="editUserName" name="name" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editUserEmail" class="required">Email Address</label>
+                        <input type="email" id="editUserEmail" name="email" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editUserDepartment">Department</label>
+                        <input type="text" id="editUserDepartment" name="department" class="form-control">
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('editUserModal')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Update User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Role Modal -->
+<div class="modal-overlay" id="changeRoleModal">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Change User Role</h3>
+                <button class="modal-close" onclick="closeModal('changeRoleModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="changeRoleForm" onsubmit="updateUserRole(event)">
+                    <input type="hidden" id="roleUserId" name="userId">
+                    
+                    <div class="form-group">
+                        <label for="newRole" class="required">New Role</label>
+                        <select id="newRole" name="role" class="form-control" required>
+                            <option value="Admin">Admin</option>
+                            <option value="Technician">Technician</option>
+                        </select>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('changeRoleModal')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check"></i> Change Role
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.user-avatar-sm {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+}
+
+.text-muted {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-dialog {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    width: 90%;
+    max-width: 540px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.show .modal-dialog {
+    transform: scale(1);
+}
+
+.modal-dialog.modal-sm {
+    max-width: 400px;
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius);
+    transition: all var(--transition-fast);
+}
+
+.modal-close:hover {
+    background-color: var(--color-gray-100);
+    color: var(--text-primary);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+</style>
+
+<script>
+async function createUser(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    
+    try {
+        const response = await api.post('/api/users', data);
+        showToast('User created successfully', 'success');
+        closeModal('newUserModal');
+        form.reset();
+        setTimeout(() => window.location.reload(), 1000);
+    } catch (error) {
+        showToast(error.message || 'Failed to create user', 'error');
+    }
+}
+
+async function editUser(userId) {
+    try {
+        const response = await api.get(`/api/users/${userId}`);
+        document.getElementById('editUserId').value = response.user._id;
+        document.getElementById('editUserName').value = response.user.name;
+        document.getElementById('editUserEmail').value = response.user.email;
+        document.getElementById('editUserDepartment').value = response.user.department || '';
+        openModal('editUserModal');
+    } catch (error) {
+        showToast('Failed to load user data', 'error');
+    }
+}
+
+async function updateUser(e) {
+    e.preventDefault();
+    const form = e.target;
+    const userId = document.getElementById('editUserId').value;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    delete data.userId;
+    
+    try {
+        await api.put(`/api/users/${userId}`, data);
+        showToast('User updated successfully', 'success');
+        closeModal('editUserModal');
+        setTimeout(() => window.location.reload(), 1000);
+    } catch (error) {
+        showToast(error.message || 'Failed to update user', 'error');
+    }
+}
+
+async function changeRole(userId) {
+    document.getElementById('roleUserId').value = userId;
+    openModal('changeRoleModal');
+}
+
+async function updateUserRole(e) {
+    e.preventDefault();
+    const userId = document.getElementById('roleUserId').value;
+    const role = document.getElementById('newRole').value;
+    
+    try {
+        await api.patch(`/api/users/${userId}/role`, { role });
+        showToast('User role updated successfully', 'success');
+        closeModal('changeRoleModal');
+        setTimeout(() => window.location.reload(), 1000);
+    } catch (error) {
+        showToast(error.message || 'Failed to update role', 'error');
+    }
+}
+
+async function toggleUserStatus(userId, enable) {
+    const action = enable ? 'enable' : 'disable';
+    if (!confirm(`Are you sure you want to ${action} this user?`)) return;
+    
+    try {
+        await api.patch(`/api/users/${userId}/status`, { isActive: enable });
+        showToast(`User ${action}d successfully`, 'success');
+        setTimeout(() => window.location.reload(), 1000);
+    } catch (error) {
+        showToast(`Failed to ${action} user`, 'error');
+    }
+}
+
+// Role filter
+document.getElementById('roleFilter')?.addEventListener('change', function() {
+    const role = this.value;
+    const rows = document.querySelectorAll('.data-table tbody tr');
+    
+    rows.forEach(row => {
+        if (!role) {
+            row.style.display = '';
+        } else {
+            const userRole = row.querySelector('.user-role').textContent;
+            row.style.display = userRole === role ? '' : 'none';
+        }
+    });
+});
+</script>
