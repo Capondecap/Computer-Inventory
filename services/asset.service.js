@@ -117,4 +117,15 @@ const getAssetHistory = async (id) => {
   return { asset, history };
 };
 
-module.exports = { listAssets, getAssetById, createAsset, updateAsset, softDeleteAsset, getAssetHistory };
+const searchAssets = async ({ q, status, limit = 10 }) => {
+  const filter = {};
+  if (status) filter.status = status;
+  if (q) {
+    const rx = new RegExp(q, 'i');
+    filter.$or = [{ itemId: rx }, { serialNumber: rx }, { brand: rx }, { model: rx }];
+  }
+  const assets = await Asset.find(filter).limit(limit).lean();
+  return assets.map(a => ({ ...a, assetId: a.itemId }));
+};
+
+module.exports = { listAssets, getAssetById, createAsset, updateAsset, softDeleteAsset, getAssetHistory, searchAssets };

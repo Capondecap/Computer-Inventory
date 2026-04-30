@@ -27,9 +27,11 @@ app.engine('hbs', engine({
   layoutsDir: path.join(__dirname, 'views/layouts'),
   partialsDir: path.join(__dirname, 'views/partials'),
   helpers: {
+    ...require('./utils/hbsHelpers'),
+    // Non-block override — templates use (isAdmin role) as a subexpression inside {{#if}}
+    isAdmin: (role) => role === 'Admin',
+    // Null-safe JSON serialisation used for Chart.js data arrays
     json: (val) => JSON.stringify(val ?? []),
-    isAdmin: (role) => role === 'admin',
-    formatDate: (date) => (date ? new Date(date).toLocaleDateString() : ''),
   },
 }));
 app.set('view engine', 'hbs');

@@ -11,7 +11,7 @@ const checkout = async (req, res, next) => {
     const assignment = await assignmentSvc.checkout({
       assetId,
       assignedTo,
-      assignedBy: req.user._id,
+      assignedBy: req.user.sub,
       expectedReturnDate: expectedReturnDate || null,
       purpose,
       condition,
@@ -36,7 +36,7 @@ const checkin = async (req, res, next) => {
 
     const assignment = await assignmentSvc.checkin({
       assetId,
-      performedBy: req.user._id,
+      performedBy: req.user.sub,
       condition,
       notes,
       documentPath: req.file ? req.file.path : null,
