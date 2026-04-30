@@ -22,28 +22,26 @@
                     </h3>
                     
                     <div class="form-group">
-                        <label for="assetSearch" class="required">Search Assigned Asset</label>
-                        <div class="search-input-group">
-                            <input 
-                                type="text" 
-                                id="assetSearch" 
-                                class="form-control" 
-                                placeholder="Search by serial number, model, or asset ID..."
-                                autocomplete="off"
-                            >
-                            <i class="fas fa-search search-icon"></i>
-                        </div>
-                        <div id="assetSearchResults" class="search-results"></div>
-                        <input type="hidden" id="assetId" name="assetId" required>
+                        <label for="assetId" class="required">Assigned Asset</label>
+                        <select id="assetId" name="assetId" class="form-control" required>
+                            <option value="">-- Select Asset by ID or Serial Number --</option>
+                            {{#each assignedAssets}}
+                                <option value="{{this._id}}" 
+                                        data-asset-id="{{this.itemId}}" 
+                                        data-name="{{this.brand}} {{this.model}}" 
+                                        data-serial="{{this.serialNumber}}"
+                                        data-assigned-to="{{this.assignment.user.name}}">
+                                    {{this.itemId}} — SN: {{this.serialNumber}} (Assigned to: {{this.assignment.user.name}})
+                                </option>
+                            {{/each}}
+                        </select>
+                        <small class="form-help">Only assets currently "In-Use" are shown here</small>
                         <span class="form-error"></span>
                     </div>
                     
                     <div id="selectedAsset" class="selected-item" style="display: none;">
                         <div class="item-header">
-                            <h4>Selected Asset</h4>
-                            <button type="button" class="btn-link" onclick="clearAssetSelection()">
-                                <i class="fas fa-times"></i> Change
-                            </button>
+                            <h4>Selected Asset Details</h4>
                         </div>
                         <div class="item-details">
                             <div class="item-icon">
@@ -57,8 +55,8 @@
                                     <strong id="assignedUser"></strong>
                                 </div>
                                 <div class="assignment-info">
-                                    <span class="info-label">Checked out:</span>
-                                    <span id="checkoutDate"></span>
+                                    <span class="info-label">Current Status:</span>
+                                    <span class="badge badge-info">In-Use</span>
                                 </div>
                             </div>
                         </div>
@@ -92,8 +90,7 @@
                                 <option value="">Select Condition</option>
                                 <option value="Good">Good - No issues</option>
                                 <option value="Fair">Fair - Minor wear</option>
-                                <option value="Damaged">Damaged - Needs repair</option>
-                                <option value="Faulty">Faulty - Not working</option>
+                                <option value="Poor">Poor - Needs repair</option>
                             </select>
                             <span class="form-error"></span>
                         </div>
@@ -160,213 +157,92 @@
     </div>
 </div>
 
-<style>
-.search-input-group {
-    position: relative;
-}
-
-.search-icon {
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--color-gray-400);
-}
-
-.search-results {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: white;
-    border: 1px solid var(--border-color);
-    border-top: none;
-    border-radius: 0 0 var(--border-radius) var(--border-radius);
-    max-height: 300px;
-    overflow-y: auto;
-    z-index: 10;
-    box-shadow: var(--shadow-md);
-    display: none;
-}
-
-.search-results.show {
-    display: block;
-}
-
-.search-result-item {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--border-color);
-    cursor: pointer;
-    transition: background-color var(--transition-fast);
-}
-
-.search-result-item:last-child {
-    border-bottom: none;
-}
-
-.search-result-item:hover {
-    background-color: var(--color-gray-50);
-}
-
-.result-title {
-    font-weight: 500;
-    color: var(--text-primary);
-    margin-bottom: 0.25rem;
-}
-
-.result-details {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-}
-
-.selected-item {
-    margin-top: 1rem;
-    padding: 1rem;
-    background-color: var(--color-gray-50);
-    border: 2px solid var(--color-primary);
-    border-radius: var(--border-radius);
-}
-
-.item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.75rem;
-}
-
-.item-header h4 {
-    margin: 0;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-
-.item-details {
-    display: flex;
-    gap: 1rem;
-}
-
-.item-icon {
-    width: 60px;
-    height: 60px;
-    background-color: var(--color-primary);
-    color: white;
-    border-radius: var(--border-radius);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    flex-shrink: 0;
-}
-
-.item-info {
-    flex: 1;
-}
-
-.item-info strong {
-    display: block;
-    font-size: 1.125rem;
-    margin-bottom: 0.25rem;
-}
-
-.item-info p {
-    color: var(--text-secondary);
-    margin-bottom: 0.5rem;
-}
-
-.assignment-info {
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-}
-
-.info-label {
-    color: var(--text-secondary);
-    margin-right: 0.5rem;
-}
 </style>
 
 <script>
-let searchTimeout;
-const assetSearchInput = document.getElementById('assetSearch');
-const assetSearchResults = document.getElementById('assetSearchResults');
-const assetIdInput = document.getElementById('assetId');
-const selectedAssetDiv = document.getElementById('selectedAsset');
+document.addEventListener('DOMContentLoaded', function() {
+    const assetSelect = document.getElementById('assetId');
+    const selectedAssetDiv = document.getElementById('selectedAsset');
+    const selectedAssetName = document.getElementById('selectedAssetName');
+    const selectedAssetDetails = document.getElementById('selectedAssetDetails');
 
-// Search for assigned assets
-assetSearchInput?.addEventListener('input', function() {
-    clearTimeout(searchTimeout);
-    const query = this.value.trim();
+    assetSelect?.addEventListener('change', function() {
+        const option = this.options[this.selectedIndex];
+        if (this.value) {
+            selectedAssetName.textContent = option.dataset.assetId;
+            selectedAssetDetails.textContent = `${option.dataset.name} — SN: ${option.dataset.serial}`;
+            document.getElementById('assignedUser').textContent = option.dataset.assignedTo || 'Unknown';
+            selectedAssetDiv.style.display = 'block';
+        } else {
+            selectedAssetDiv.style.display = 'none';
+        }
+    });
+
+    // Auto-select status based on condition
+    document.getElementById('condition')?.addEventListener('change', function() {
+        const statusSelect = document.getElementById('newStatus');
+        if (this.value === 'Poor') {
+            statusSelect.value = 'Maintenance';
+        } else {
+            statusSelect.value = 'Available';
+        }
+    });
+
+    // File upload handling
+    const fileArea = document.getElementById('fileUploadArea');
+    const fileInput = document.getElementById('document');
     
-    if (query.length < 2) {
-        assetSearchResults.classList.remove('show');
-        return;
-    }
+    fileArea?.addEventListener('click', () => fileInput.click());
     
-    searchTimeout = setTimeout(() => {
-        searchAssets(query);
-    }, 300);
+    fileInput?.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            const fileName = this.files[0].name;
+            document.querySelector('.upload-placeholder').style.display = 'none';
+            document.querySelector('.upload-preview').style.display = 'flex';
+            document.querySelector('.file-name').textContent = fileName;
+        }
+    });
+
+    // Form submission
+    document.getElementById('checkin-form')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const assetId = document.getElementById('assetId').value;
+        if (!assetId) {
+            showToast('Please select an asset to check in', 'error');
+            return;
+        }
+
+        const btn = this.querySelector('[type="submit"]');
+        setButtonLoading(btn, true);
+        
+        const formData = new FormData(this);
+        
+        try {
+            const response = await fetch('/api/transactions/checkin', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || 'Check-in failed');
+            }
+            
+            showToast('Asset checked in successfully', 'success');
+            setTimeout(() => window.location.href = '/assignments', 1000);
+        } catch (err) {
+            showToast(err.message || 'Check-in failed', 'error');
+            setButtonLoading(btn, false);
+        }
+    });
 });
 
-async function searchAssets(query) {
-    try {
-        const response = await api.get(`/api/items/search?q=${encodeURIComponent(query)}&status=In-Use`);
-        displaySearchResults(response.items || []);
-    } catch (error) {
-        console.error('Search failed:', error);
-    }
+function clearFile() {
+    const fileInput = document.getElementById('document');
+    fileInput.value = '';
+    document.querySelector('.upload-placeholder').style.display = 'block';
+    document.querySelector('.upload-preview').style.display = 'none';
 }
-
-function displaySearchResults(items) {
-    if (items.length === 0) {
-        assetSearchResults.innerHTML = '<div class="search-result-item"><p class="result-details">No assigned assets found</p></div>';
-        assetSearchResults.classList.add('show');
-        return;
-    }
-    
-    assetSearchResults.innerHTML = items.map(item => `
-        <div class="search-result-item" onclick="selectAsset('${item._id}', '${item.assetId}', '${item.brand} ${item.model}', '${item.serialNumber}', '${item.assignedTo?.name || 'Unknown'}', '${item.checkoutDate || ''}')">
-            <div class="result-title">${item.assetId} - ${item.brand} ${item.model}</div>
-            <div class="result-details">
-                SN: ${item.serialNumber} | Assigned to: ${item.assignedTo?.name || 'Unknown'}
-            </div>
-        </div>
-    `).join('');
-    
-    assetSearchResults.classList.add('show');
-}
-
-function selectAsset(id, assetId, name, serial, assignedUser, checkoutDate) {
-    assetIdInput.value = id;
-    document.getElementById('selectedAssetName').textContent = assetId;
-    document.getElementById('selectedAssetDetails').textContent = `Serial: ${serial}`;
-    document.getElementById('assignedUser').textContent = assignedUser;
-    document.getElementById('checkoutDate').textContent = new Date(checkoutDate).toLocaleDateString();
-    
-    selectedAssetDiv.style.display = 'block';
-    assetSearchInput.value = assetId;
-    assetSearchResults.classList.remove('show');
-}
-
-function clearAssetSelection() {
-    assetIdInput.value = '';
-    assetSearchInput.value = '';
-    selectedAssetDiv.style.display = 'none';
-}
-
-// Close search results when clicking outside
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('.search-input-group')) {
-        assetSearchResults.classList.remove('show');
-    }
-});
-
-// Auto-select status based on condition
-document.getElementById('condition')?.addEventListener('change', function() {
-    const statusSelect = document.getElementById('newStatus');
-    if (this.value === 'Damaged' || this.value === 'Faulty') {
-        statusSelect.value = 'Maintenance';
-    } else {
-        statusSelect.value = 'Available';
-    }
-});
 </script>

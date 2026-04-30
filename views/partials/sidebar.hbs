@@ -31,18 +31,18 @@
                 <i class="fas fa-sign-in-alt"></i>
                 <span>Check In</span>
             </a>
-            <a href="/maintenance" class="sidebar-item {{#ifEquals activePage 'maintenance'}}active{{/ifEquals}}">
-                <i class="fas fa-tools"></i>
-                <span>Maintenance</span>
+            <a href="/maintenance/request" class="sidebar-item {{#ifEquals activePage 'maintenance-request'}}active{{/ifEquals}}">
+                <i class="fas fa-wrench"></i>
+                <span>Request Maintenance</span>
+            </a>
+            <a href="/maintenance/history" class="sidebar-item {{#ifEquals activePage 'maintenance-history'}}active{{/ifEquals}}">
+                <i class="fas fa-history"></i>
+                <span>Maintenance History</span>
             </a>
         </div>
         
         <div class="sidebar-section">
             <h3 class="sidebar-section-title">Reports</h3>
-            <a href="/reports" class="sidebar-item {{#ifEquals activePage 'reports'}}active{{/ifEquals}}">
-                <i class="fas fa-file-alt"></i>
-                <span>All Reports</span>
-            </a>
             <a href="/reports/status" class="sidebar-item">
                 <i class="fas fa-clipboard-check"></i>
                 <span>Status Summary</span>
@@ -50,6 +50,10 @@
             <a href="/reports/aging" class="sidebar-item">
                 <i class="fas fa-clock"></i>
                 <span>Asset Aging</span>
+            </a>
+            <a href="/reports/user-audit" class="sidebar-item">
+                <i class="fas fa-user-check"></i>
+                <span>User Audit</span>
             </a>
         </div>
         
@@ -64,17 +68,8 @@
                 <i class="fas fa-key"></i>
                 <span>API Keys</span>
             </a>
-            <a href="/audit-logs" class="sidebar-item {{#ifEquals activePage 'audit-logs'}}active{{/ifEquals}}">
-                <i class="fas fa-history"></i>
-                <span>Audit Logs</span>
-            </a>
         </div>
         {{/if}}
     </nav>
     
-    <div class="sidebar-footer">
-        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-    </div>
 </aside>

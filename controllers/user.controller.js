@@ -68,4 +68,61 @@ const updateStatus = async (req, res, next) => {
   }
 };
 
-module.exports = { createUser, updateRole, updateStatus };
+const getUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password');
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    res.json({ success: true, user });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const updateUser = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ success: false, errors: errors.array() });
+  }
+
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const { name, email, password } = req.body;
+    user.name = name;
+    user.email = email;
+
+    if (typeof password === 'string' && password.trim()) {
+      user.password = password;
+    }
+
+    await user.save();
+
+    const updated = await User.findById(user._id).select('-password').lean();
+    res.json({ success: true, user: updated });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(409).json({ success: false, message: 'Email already in use' });
+    }
+    next(err);
+  }
+};
+
+const searchUsers = async (req, res, next) => {
+  try {
+    const q = req.query.q || '';
+    const limit = Math.min(parseInt(req.query.limit, 10) || 10, 5000);
+    const rx = new RegExp(q, 'i');
+    const users = await User.find({
+      $and: [
+        { $or: [{ isActive: true }, { isActive: { $exists: false } }] },
+        { $or: [{ name: rx }, { email: rx }] },
+      ],
+    }).select('name email role').limit(limit).lean();
+    res.json({ success: true, users });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { createUser, getUser, updateUser, updateRole, updateStatus, searchUsers };

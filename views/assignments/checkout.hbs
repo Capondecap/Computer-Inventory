@@ -22,19 +22,22 @@
                     </h3>
                     
                     <div class="form-group">
-                        <label for="assetSearch" class="required">Search Asset</label>
-                        <div class="search-input-group">
-                            <input 
-                                type="text" 
-                                id="assetSearch" 
-                                class="form-control" 
-                                placeholder="Search by serial number, model, or asset ID..."
-                                autocomplete="off"
-                            >
-                            <i class="fas fa-search search-icon"></i>
-                        </div>
-                        <div id="assetSearchResults" class="search-results"></div>
-                        <input type="hidden" id="assetId" name="assetId" required>
+                        <label for="assetId" class="required">Available Assets</label>
+                        <select id="assetId" name="assetId" class="form-control" required>
+                            <option value="">Select an available asset</option>
+                            {{#each assetOptions}}
+                                <option
+                                    value="{{this._id}}"
+                                    data-asset-id="{{this.itemId}}"
+                                    data-brand="{{this.brand}}"
+                                    data-model="{{this.model}}"
+                                    data-serial-number="{{this.serialNumber}}"
+                                    data-status="{{this.status}}"
+                                >
+                                    {{this.itemId}} — {{this.brand}} {{this.model}}
+                                </option>
+                            {{/each}}
+                        </select>
                         <span class="form-error"></span>
                     </div>
                     
@@ -65,19 +68,20 @@
                     </h3>
                     
                     <div class="form-group">
-                        <label for="userSearch" class="required">Search User</label>
-                        <div class="search-input-group">
-                            <input 
-                                type="text" 
-                                id="userSearch" 
-                                class="form-control" 
-                                placeholder="Search by name or email..."
-                                autocomplete="off"
-                            >
-                            <i class="fas fa-search search-icon"></i>
-                        </div>
-                        <div id="userSearchResults" class="search-results"></div>
-                        <input type="hidden" id="userId" name="userId" required>
+                        <label for="assignedTo" class="required">Available Users</label>
+                        <select id="assignedTo" name="assignedTo" class="form-control" required>
+                            <option value="">Select a user</option>
+                            {{#each userOptions}}
+                                <option
+                                    value="{{this._id}}"
+                                    data-name="{{this.name}}"
+                                    data-email="{{this.email}}"
+                                    data-role="{{this.role}}"
+                                >
+                                    {{this.name}} — {{this.email}}
+                                </option>
+                            {{/each}}
+                        </select>
                         <span class="form-error"></span>
                     </div>
                     
@@ -95,7 +99,7 @@
                             <div class="item-info">
                                 <strong id="selectedUserName"></strong>
                                 <p id="selectedUserEmail"></p>
-                                <span class="badge badge-info" id="selectedUserDept"></span>
+                                <span class="badge badge-info" id="selectedUserRole"></span>
                             </div>
                         </div>
                     </div>
@@ -124,10 +128,10 @@
                         
                         <div class="form-group">
                             <label for="expectedReturn">Expected Return Date</label>
-                            <input 
-                                type="date" 
-                                id="expectedReturn" 
-                                name="expectedReturn" 
+                            <input
+                                type="date"
+                                id="expectedReturnDate"
+                                name="expectedReturnDate"
                                 class="form-control"
                                 min="{{getCurrentDate}}"
                             >

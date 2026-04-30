@@ -9,9 +9,6 @@
                 <h3>{{stats.totalAssets}}</h3>
                 <p>Total Assets</p>
             </div>
-            <div class="stat-change positive">
-                <i class="fas fa-arrow-up"></i> {{stats.assetsChange}}%
-            </div>
         </div>
         
         <div class="stat-card stat-success">
@@ -60,7 +57,7 @@
             <div class="card-header">
                 <h3>Asset Distribution by Category</h3>
                 <div class="card-actions">
-                    <button class="btn-icon" aria-label="Refresh">
+                    <button class="btn-icon refresh-dashboard" data-chart="category" aria-label="Refresh">
                         <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
@@ -74,7 +71,7 @@
             <div class="card-header">
                 <h3>Asset Status Overview</h3>
                 <div class="card-actions">
-                    <button class="btn-icon" aria-label="Refresh">
+                    <button class="btn-icon refresh-dashboard" data-chart="status" aria-label="Refresh">
                         <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
@@ -85,27 +82,35 @@
         </div>
     </div>
     
-    <!-- Recent Activity and Quick Actions -->
-    <div class="dashboard-row">
+    <div class="dashboard-row full-width-row">
         <div class="dashboard-card activity-card">
             <div class="card-header">
-                <h3>Recent Activity</h3>
-                <a href="/audit-logs" class="card-link">View all <i class="fas fa-arrow-right"></i></a>
+                <div class="header-with-icon">
+                    <i class="fas fa-stream text-primary"></i>
+                    <h3>Recent System Activity</h3>
+                </div>
+                <a href="/reports" class="btn btn-sm btn-outline">View Full Audit <i class="fas fa-arrow-right"></i></a>
             </div>
             <div class="card-body">
                 {{#if recentActivity}}
-                <div class="activity-list">
+                <div class="activity-timeline">
                     {{#each recentActivity}}
-                    <div class="activity-item">
-                        <div class="activity-icon {{this.type}}">
+                    <div class="timeline-item">
+                        <div class="timeline-marker {{this.type}}">
                             <i class="fas {{this.icon}}"></i>
                         </div>
-                        <div class="activity-content">
-                            <p class="activity-text">{{this.description}}</p>
-                            <span class="activity-meta">
-                                <span class="activity-user">{{this.user}}</span>
-                                <span class="activity-time">{{formatDate this.timestamp}}</span>
-                            </span>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="timeline-title">{{this.description}}</span>
+                                <span class="timeline-time">{{formatDateTime this.timestamp}}</span>
+                            </div>
+                            <div class="timeline-body">
+                                <div class="timeline-user">
+                                    <i class="fas fa-user-circle"></i>
+                                    <span>Performed by <strong>{{this.user}}</strong></span>
+                                </div>
+                                <span class="badge badge-outline-{{this.type}}">{{this.label}}</span>
+                            </div>
                         </div>
                     </div>
                     {{/each}}
@@ -113,45 +118,9 @@
                 {{else}}
                 <div class="empty-state">
                     <i class="fas fa-history"></i>
-                    <p>No recent activity</p>
+                    <p>No recent activity has been recorded yet.</p>
                 </div>
                 {{/if}}
-            </div>
-        </div>
-        
-        <div class="dashboard-card">
-            <div class="card-header">
-                <h3>Quick Actions</h3>
-            </div>
-            <div class="card-body">
-                <div class="quick-actions">
-                    <a href="/assets/new" class="quick-action-btn">
-                        <i class="fas fa-plus-circle"></i>
-                        <span>Add New Asset</span>
-                    </a>
-                    <a href="/assignments/checkout" class="quick-action-btn">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Check Out Asset</span>
-                    </a>
-                    <a href="/assignments/checkin" class="quick-action-btn">
-                        <i class="fas fa-sign-in-alt"></i>
-                        <span>Check In Asset</span>
-                    </a>
-                    <a href="/reports" class="quick-action-btn">
-                        <i class="fas fa-file-alt"></i>
-                        <span>Generate Report</span>
-                    </a>
-                    {{#if (isAdmin user.role)}}
-                    <a href="/users/new" class="quick-action-btn">
-                        <i class="fas fa-user-plus"></i>
-                        <span>Add User</span>
-                    </a>
-                    <a href="/api-keys" class="quick-action-btn">
-                        <i class="fas fa-key"></i>
-                        <span>Manage API Keys</span>
-                    </a>
-                    {{/if}}
-                </div>
             </div>
         </div>
     </div>
@@ -186,38 +155,25 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    let categoryChartInstance, statusChartInstance;
+
     // Category Distribution Chart
     const categoryCtx = document.getElementById('categoryChart');
     if (categoryCtx) {
-        new Chart(categoryCtx, {
+        categoryChartInstance = new Chart(categoryCtx, {
             type: 'doughnut',
             data: {
                 labels: {{{json categoryLabels}}},
                 datasets: [{
                     data: {{{json categoryData}}},
-                    backgroundColor: [
-                        '#4F46E5',
-                        '#10B981',
-                        '#F59E0B',
-                        '#EF4444',
-                        '#8B5CF6',
-                        '#06B6D4'
-                    ],
+                    backgroundColor: ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'],
                     borderWidth: 0
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 15,
-                            usePointStyle: true
-                        }
-                    }
-                }
+                plugins: { legend: { position: 'bottom', labels: { padding: 15, usePointStyle: true } } }
             }
         });
     }
@@ -225,40 +181,52 @@ document.addEventListener('DOMContentLoaded', function() {
     // Status Overview Chart
     const statusCtx = document.getElementById('statusChart');
     if (statusCtx) {
-        new Chart(statusCtx, {
+        statusChartInstance = new Chart(statusCtx, {
             type: 'bar',
             data: {
                 labels: {{{json statusLabels}}},
                 datasets: [{
                     label: 'Assets',
                     data: {{{json statusData}}},
-                    backgroundColor: [
-                        '#10B981',
-                        '#F59E0B',
-                        '#EF4444',
-                        '#6B7280'
-                    ],
+                    backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#6B7280'],
                     borderRadius: 6
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        }
-                    }
-                }
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
             }
         });
     }
+
+    // Targeted Refresh Logic
+    document.querySelectorAll('.refresh-dashboard').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const chartType = this.dataset.chart;
+            const icon = this.querySelector('i');
+            
+            icon.classList.add('fa-spin');
+            
+            try {
+                const response = await fetch('/api/dashboard/stats');
+                const data = await response.json();
+                
+                if (chartType === 'category' && categoryChartInstance) {
+                    categoryChartInstance.data.labels = data.categoryLabels;
+                    categoryChartInstance.data.datasets[0].data = data.categoryData;
+                    categoryChartInstance.update();
+                } else if (chartType === 'status' && statusChartInstance) {
+                    statusChartInstance.data.datasets[0].data = data.statusData;
+                    statusChartInstance.update();
+                }
+            } catch (err) {
+                console.error('Refresh failed:', err);
+            } finally {
+                setTimeout(() => icon.classList.remove('fa-spin'), 600);
+            }
+        });
+    });
 });
 </script>

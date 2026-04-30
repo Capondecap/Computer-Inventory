@@ -2,7 +2,7 @@ const express = require('express');
 const { body, param } = require('express-validator');
 const requireAuth = require('../middleware/requireAuth');
 const requireRole = require('../middleware/requireRole');
-const { createUser, updateRole, updateStatus } = require('../controllers/user.controller');
+const { createUser, getUser, updateUser, updateRole, updateStatus, searchUsers } = require('../controllers/user.controller');
 
 const router = express.Router();
 
@@ -39,6 +39,30 @@ router.patch(
     body('isActive').isBoolean().withMessage('isActive must be a boolean'),
   ],
   updateStatus
+);
+
+router.get('/search', requireAuth, searchUsers);
+
+router.get(
+  '/:id',
+  adminOnly,
+  [param('id').isMongoId().withMessage('Invalid user ID')],
+  getUser
+);
+
+router.put(
+  '/:id',
+  adminOnly,
+  [
+    param('id').isMongoId().withMessage('Invalid user ID'),
+    body('name').trim().notEmpty().withMessage('Name is required'),
+    body('email').isEmail().withMessage('Valid email is required').normalizeEmail(),
+    body('password')
+      .optional({ checkFalsy: true })
+      .isLength({ min: 8 })
+      .withMessage('Password must be at least 8 characters'),
+  ],
+  updateUser
 );
 
 module.exports = router;

@@ -1,0 +1,36 @@
+<div class="result-page {{status}}">
+    <div class="card result-card">
+        <div class="result-icon">
+            {{#ifEquals status 'success'}}
+                <i class="fas fa-check"></i>
+            {{else}}
+                <i class="fas fa-times"></i>
+            {{/ifEquals}}
+        </div>
+
+        <h2 class="result-title">
+            {{#ifEquals status 'success'}}
+                Asset created successfully
+            {{else}}
+                Asset creation declined
+            {{/ifEquals}}
+        </h2>
+
+        <p class="result-message">
+            {{#if message}}
+                {{message}}
+            {{else}}
+                {{#ifEquals status 'success'}}
+                    The asset was saved to the inventory.
+                {{else}}
+                    The asset could not be saved.
+                {{/ifEquals}}
+            {{/if}}
+        </p>
+
+        <div class="result-actions">
+            <a href="/assets" class="btn btn-primary">Back to Assets</a>
+            <a href="/assets/new" class="btn btn-secondary">Create Another Asset</a>
+        </div>
+    </div>
+</div>

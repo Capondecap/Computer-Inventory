@@ -12,15 +12,7 @@
             <i class="fas fa-user-check"></i>
             User Audit
         </a>
-        <a href="/reports/maintenance" class="tab {{#ifEquals reportType 'maintenance'}}active{{/ifEquals}}">
-            <i class="fas fa-tools"></i>
-            Maintenance
-        </a>
     </div>
-    
-    <button class="btn btn-primary" onclick="exportReport()">
-        <i class="fas fa-file-export"></i> Export Report
-    </button>
 </div>
 
 <!-- Status Summary Report -->
@@ -84,6 +76,66 @@
                 </div>
                 {{/each}}
             </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h3>Recent System Activity (Detailed)</h3>
+        </div>
+        <div class="card-body">
+            {{#if report.recentActivity}}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Time</th>
+                            <th class="text-center">Action</th>
+                            <th class="text-center">Description</th>
+                            <th class="text-center">Performed By</th>
+                            <th class="text-center">Asset</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each report.recentActivity}}
+                        <tr>
+                            <td class="text-secondary text-center" style="white-space: nowrap;">
+                                {{formatDateTime this.timestamp}}
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-outline-{{this.type}}">
+                                    <i class="fas {{this.icon}}"></i> {{this.label}}
+                                </span>
+                            </td>
+                            <td class="text-center">{{this.description}}</td>
+                            <td class="text-center">
+                                <div class="user-info-centered">
+                                    <strong>{{this.performedBy.name}}</strong>
+                                    {{#if this.performedBy.email}}<div class="text-secondary small">{{this.performedBy.email}}</div>{{/if}}
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                {{#if this.asset}}
+                                <div class="asset-info-centered">
+                                    <a href="/assets/{{this.asset._id}}" class="asset-link">
+                                        {{this.asset.itemId}}
+                                    </a>
+                                    <div class="text-secondary small">{{this.asset.brand}} {{this.asset.model}}</div>
+                                </div>
+                                {{else}}
+                                <span class="text-secondary">N/A</span>
+                                {{/if}}
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+            {{else}}
+            <div class="empty-state">
+                <i class="fas fa-history"></i>
+                <p>No activity has been recorded yet.</p>
+            </div>
+            {{/if}}
         </div>
     </div>
 </div>
@@ -335,12 +387,11 @@
     background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
     transition: width 0.3s ease;
 }
+.text-center { text-align: center !important; }
+.user-info-centered, .asset-info-centered {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 </style>
 
-<script>
-function exportReport() {
-    const reportType = '{{reportType}}';
-    const params = new URLSearchParams(window.location.search);
-    window.location.href = `/api/reports/${reportType}/export?${params.toString()}`;
-}
-</script>

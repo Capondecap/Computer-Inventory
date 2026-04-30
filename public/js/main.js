@@ -580,6 +580,23 @@ window.api = {
     }
   },
   
+  async patch(url, data) {
+    try {
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+      return await this.handleResponse(response);
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  },
+
   async delete(url) {
     try {
       const response = await fetch(url, {
@@ -599,7 +616,9 @@ window.api = {
     const data = await response.json();
     
     if (!response.ok) {
-      throw new Error(data.message || 'An error occurred');
+      const error = new Error(data.message || 'An error occurred');
+      if (data.errors) error.details = data.errors;
+      throw error;
     }
     
     return data;

@@ -10,10 +10,17 @@
             <h2>{{#if asset}}Edit Asset{{else}}Add New Asset{{/if}}</h2>
         </div>
         <div class="card-body">
-            <form action="{{#if asset}}/assets/{{asset._id}}{{else}}/assets{{/if}}" method="POST" id="asset-form" novalidate>
-                {{#if asset}}
-                <input type="hidden" name="_method" value="PUT">
-                {{/if}}
+            {{#if formError}}
+            <div class="alert alert-error" role="alert">
+                <i class="fas fa-exclamation-circle"></i>
+                <div class="alert-content">
+                    <strong>Unable to save asset</strong>
+                    <p>{{formError}}</p>
+                </div>
+            </div>
+            {{/if}}
+
+            <form action="{{#if asset}}/assets/{{asset._id}}{{else}}/assets{{/if}}" method="POST" id="asset-form" data-asset-id="{{asset._id}}" novalidate>
                 
                 <div class="form-row">
                     <div class="form-group">
@@ -32,14 +39,14 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="assetId">Asset ID</label>
-                        <input 
-                            type="text" 
-                            id="assetId" 
-                            name="assetId" 
-                            class="form-control" 
+                        <label for="itemId">Asset ID</label>
+                        <input
+                            type="text"
+                            id="itemId"
+                            name="itemId"
+                            class="form-control"
                             placeholder="Auto-generated if empty"
-                            value="{{asset.assetId}}"
+                            value="{{asset.itemId}}"
                             {{#if asset}}readonly{{/if}}
                         >
                         <small class="form-help">Leave empty for auto-generation</small>
@@ -101,8 +108,8 @@
                                 <option value="Keyboard" {{#ifEquals asset.category 'Keyboard'}}selected{{/ifEquals}}>Keyboard</option>
                                 <option value="Mouse" {{#ifEquals asset.category 'Mouse'}}selected{{/ifEquals}}>Mouse</option>
                                 <option value="Printer" {{#ifEquals asset.category 'Printer'}}selected{{/ifEquals}}>Printer</option>
-                                <option value="Headset" {{#ifEquals asset.category 'Headset'}}selected{{/ifEquals}}>Headset</option>
-                                <option value="Webcam" {{#ifEquals asset.category 'Webcam'}}selected{{/ifEquals}}>Webcam</option>
+                                <option value="Scanner" {{#ifEquals asset.category 'Scanner'}}selected{{/ifEquals}}>Scanner</option>
+                                <option value="UPS" {{#ifEquals asset.category 'UPS'}}selected{{/ifEquals}}>UPS</option>
                             </optgroup>
                             <option value="Other" {{#ifEquals asset.category 'Other'}}selected{{/ifEquals}}>Other</option>
                         </select>
@@ -120,6 +127,24 @@
                         <span class="form-error"></span>
                     </div>
                 </div>
+                
+                <template id="assigned-to-template">
+                    <div class="form-row" id="assigned-to-row">
+                        <div class="form-group">
+                            <label for="assignedTo" class="required">Assigned To</label>
+                            <select id="assignedTo" name="assignedTo" class="form-control" required>
+                                <option value="">Select User</option>
+                                {{#each userOptions}}
+                                    <option value="{{this._id}}" {{#ifEquals this._id ../selectedAssignedTo}}selected{{/ifEquals}}>
+                                        {{this.name}} ({{this.email}})
+                                    </option>
+                                {{/each}}
+                            </select>
+                            <small class="form-help">Select the user who will be using this asset</small>
+                            <span class="form-error"></span>
+                        </div>
+                    </div>
+                </template>
                 
                 <div class="form-row">
                     <div class="form-group">
@@ -210,76 +235,4 @@
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('asset-form');
-    
-    form.addEventListener('submit', function(e) {
-        let isValid = true;
-        
-        // Clear previous errors
-        document.querySelectorAll('.form-error').forEach(el => el.textContent = '');
-        document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
-        
-        // Validate required fields
-        const requiredFields = ['serialNumber', 'brand', 'model', 'category', 'status', 'dateAcquired'];
-        
-        requiredFields.forEach(fieldName => {
-            const field = document.getElementById(fieldName);
-            if (!field.value.trim()) {
-                showError(field, 'This field is required');
-                isValid = false;
-            }
-        });
-        
-        // Validate serial number format (alphanumeric)
-        const serialNumber = document.getElementById('serialNumber');
-        if (serialNumber.value && !/^[A-Za-z0-9-]+$/.test(serialNumber.value)) {
-            showError(serialNumber, 'Serial number can only contain letters, numbers, and hyphens');
-            isValid = false;
-        }
-        
-        // Validate date acquired (not in future)
-        const dateAcquired = document.getElementById('dateAcquired');
-        if (dateAcquired.value) {
-            const acquired = new Date(dateAcquired.value);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
-            if (acquired > today) {
-                showError(dateAcquired, 'Date acquired cannot be in the future');
-                isValid = false;
-            }
-        }
-        
-        // Validate warranty expiry (must be after date acquired)
-        const warrantyExpiry = document.getElementById('warrantyExpiry');
-        if (warrantyExpiry.value && dateAcquired.value) {
-            const warranty = new Date(warrantyExpiry.value);
-            const acquired = new Date(dateAcquired.value);
-            
-            if (warranty < acquired) {
-                showError(warrantyExpiry, 'Warranty expiry must be after date acquired');
-                isValid = false;
-            }
-        }
-        
-        if (!isValid) {
-            e.preventDefault();
-            // Scroll to first error
-            const firstError = document.querySelector('.invalid');
-            if (firstError) {
-                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }
-    });
-    
-    function showError(field, message) {
-        field.classList.add('invalid');
-        const errorElement = field.parentElement.querySelector('.form-error');
-        if (errorElement) {
-            errorElement.textContent = message;
-        }
-    }
-});
-</script>
+<script src="/js/asset-form.js"></script>

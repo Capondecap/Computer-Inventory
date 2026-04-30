@@ -5,19 +5,89 @@
     </div>
     
     <div class="navbar-menu">
-        <div class="navbar-search">
-            <i class="fas fa-search"></i>
-            <input type="text" id="global-search" placeholder="Search assets, users..." aria-label="Global search">
+        <div class="navbar-search-container">
+            <form action="/assets" method="GET" class="navbar-search" id="global-search-form">
+                <i class="fas fa-search"></i>
+                <input 
+                    type="text" 
+                    name="search" 
+                    id="global-search" 
+                    placeholder="Search assets..." 
+                    aria-label="Global search"
+                    autocomplete="off"
+                >
+            </form>
+            <div id="search-suggestions" class="search-suggestions hidden"></div>
         </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('global-search');
+    const suggestionsBox = document.getElementById('search-suggestions');
+    let debounceTimer;
+
+    searchInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        clearTimeout(debounceTimer);
+
+        if (query.length < 2) {
+            suggestionsBox.classList.add('hidden');
+            return;
+        }
+
+        debounceTimer = setTimeout(() => {
+            fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        suggestionsBox.classList.add('hidden');
+                        return;
+                    }
+
+                    suggestionsBox.innerHTML = data.map(item => `
+                        <div class="suggestion-item" data-type="${item.type}" data-id="${item.id}" data-title="${item.title}">
+                            <div class="suggestion-icon">
+                                <i class="fas ${item.icon}"></i>
+                            </div>
+                            <div class="suggestion-info">
+                                <div class="suggestion-title">${item.title}</div>
+                                <div class="suggestion-subtitle">${item.subtitle}</div>
+                            </div>
+                            <div class="suggestion-type">${item.type}</div>
+                        </div>
+                    `).join('');
+
+                    suggestionsBox.classList.remove('hidden');
+                });
+        }, 300);
+    });
+
+    suggestionsBox.addEventListener('click', function(e) {
+        const item = e.target.closest('.suggestion-item');
+        if (!item) return;
+
+        const type = item.dataset.type;
+        const id = item.dataset.id;
+        const title = item.dataset.title;
+
+        if (type === 'asset') {
+            window.location.href = `/assets/${id}`;
+        } else {
+            // If it's a user, maybe search for assets assigned to them
+            window.location.href = `/assets?search=${encodeURIComponent(title)}`;
+        }
+    });
+
+    // Close suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+            suggestionsBox.classList.add('hidden');
+        }
+    });
+});
+</script>
         
         <div class="navbar-actions">
-            <button class="navbar-icon-btn" id="notifications-btn" aria-label="Notifications">
-                <i class="fas fa-bell"></i>
-                {{#if unreadNotifications}}
-                    <span class="badge">{{unreadNotifications}}</span>
-                {{/if}}
-            </button>
-            
             <div class="navbar-user">
                 <button class="user-menu-btn" id="user-menu-btn" aria-label="User menu">
                     <div class="user-avatar">
@@ -36,13 +106,6 @@
                         <strong>{{user.name}}</strong>
                         <span class="user-role {{user.role}}">{{user.role}}</span>
                     </div>
-                    <hr>
-                    <a href="/profile" class="dropdown-item">
-                        <i class="fas fa-user-circle"></i> Profile
-                    </a>
-                    <a href="/settings" class="dropdown-item">
-                        <i class="fas fa-cog"></i> Settings
-                    </a>
                     <hr>
                     <a href="/logout" class="dropdown-item logout">
                         <i class="fas fa-sign-out-alt"></i> Logout

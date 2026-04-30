@@ -16,7 +16,7 @@ const checkout = async (req, res, next) => {
       purpose,
       condition,
       notes,
-      documentPath: req.file ? req.file.path : null,
+      documentPath: req.file ? req.file.filename : null,
       ipAddress: req.ip,
     });
 
@@ -28,7 +28,7 @@ const checkout = async (req, res, next) => {
 
 const checkin = async (req, res, next) => {
   try {
-    const { assetId, condition, notes } = req.body;
+    const { assetId, condition, notes, newStatus } = req.body;
 
     if (!assetId) {
       return res.status(400).json({ success: false, message: 'assetId is required' });
@@ -39,7 +39,8 @@ const checkin = async (req, res, next) => {
       performedBy: req.user.sub,
       condition,
       notes,
-      documentPath: req.file ? req.file.path : null,
+      newStatus,
+      documentPath: req.file ? req.file.filename : null,
       ipAddress: req.ip,
     });
 

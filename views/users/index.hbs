@@ -1,5 +1,5 @@
 <div class="page-actions">
-    <button class="btn btn-primary" onclick="openModal('newUserModal')">
+    <button type="button" id="addUserBtn" class="btn btn-primary">
         <i class="fas fa-user-plus"></i> Add New User
     </button>
 </div>
@@ -27,7 +27,6 @@
                         <th>Role</th>
                         <th>Status</th>
                         <th>Created</th>
-                        <th>Last Login</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -55,26 +54,19 @@
                         </td>
                         <td>{{formatDate this.createdAt}}</td>
                         <td>
-                            {{#if this.lastLogin}}
-                                {{formatDateTime this.lastLogin}}
-                            {{else}}
-                                <span class="text-muted">Never</span>
-                            {{/if}}
-                        </td>
-                        <td>
                             <div class="action-buttons">
-                                <button class="btn-icon" onclick="editUser('{{this._id}}')" title="Edit">
+                                <button type="button" class="btn-icon user-action-btn" data-action="edit" data-user-id="{{this._id}}" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn-icon" onclick="changeRole('{{this._id}}')" title="Change Role">
+                                <button type="button" class="btn-icon user-action-btn" data-action="change-role" data-user-id="{{this._id}}" data-user-role="{{this.role}}" title="Change Role">
                                     <i class="fas fa-user-tag"></i>
                                 </button>
                                 {{#if this.isActive}}
-                                    <button class="btn-icon btn-warning" onclick="toggleUserStatus('{{this._id}}', false)" title="Disable">
+                                    <button type="button" class="btn-icon btn-warning user-action-btn" data-action="toggle-status" data-user-id="{{this._id}}" data-enable="false" title="Disable">
                                         <i class="fas fa-user-slash"></i>
                                     </button>
                                 {{else}}
-                                    <button class="btn-icon btn-success" onclick="toggleUserStatus('{{this._id}}', true)" title="Enable">
+                                    <button type="button" class="btn-icon btn-success user-action-btn" data-action="toggle-status" data-user-id="{{this._id}}" data-enable="true" title="Enable">
                                         <i class="fas fa-user-check"></i>
                                     </button>
                                 {{/if}}
@@ -101,12 +93,12 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Add New User</h3>
-                <button class="modal-close" onclick="closeModal('newUserModal')">
+                <button type="button" class="modal-close" data-close-modal="newUserModal">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
-                <form id="newUserForm" onsubmit="createUser(event)">
+                <form id="newUserForm">
                     <div class="form-group">
                         <label for="userName" class="required">Full Name</label>
                         <input type="text" id="userName" name="name" class="form-control" required>
@@ -137,13 +129,8 @@
                         </select>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="userDepartment">Department</label>
-                        <input type="text" id="userDepartment" name="department" class="form-control" placeholder="e.g., IT, Engineering">
-                    </div>
-                    
                     <div class="modal-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeModal('newUserModal')">Cancel</button>
+                        <button type="button" class="btn btn-secondary" data-close-modal="newUserModal">Cancel</button>
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-user-plus"></i> Create User
                         </button>
@@ -160,12 +147,12 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Edit User</h3>
-                <button class="modal-close" onclick="closeModal('editUserModal')">
+                <button type="button" class="modal-close" data-close-modal="editUserModal">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
-                <form id="editUserForm" onsubmit="updateUser(event)">
+                <form id="editUserForm">
                     <input type="hidden" id="editUserId" name="userId">
                     
                     <div class="form-group">
@@ -177,14 +164,20 @@
                         <label for="editUserEmail" class="required">Email Address</label>
                         <input type="email" id="editUserEmail" name="email" class="form-control" required>
                     </div>
-                    
+
                     <div class="form-group">
-                        <label for="editUserDepartment">Department</label>
-                        <input type="text" id="editUserDepartment" name="department" class="form-control">
+                        <label for="editUserPassword">New Password</label>
+                        <div class="password-input-group">
+                            <input type="password" id="editUserPassword" name="password" class="form-control" minlength="8" placeholder="Leave blank to keep current password">
+                            <button type="button" class="password-toggle" aria-label="Toggle password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <small class="form-help">Leave blank to keep the current password</small>
                     </div>
                     
                     <div class="modal-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeModal('editUserModal')">Cancel</button>
+                        <button type="button" class="btn btn-secondary" data-close-modal="editUserModal">Cancel</button>
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i> Update User
                         </button>
@@ -201,12 +194,12 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Change User Role</h3>
-                <button class="modal-close" onclick="closeModal('changeRoleModal')">
+                <button type="button" class="modal-close" data-close-modal="changeRoleModal">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
-                <form id="changeRoleForm" onsubmit="updateUserRole(event)">
+                <form id="changeRoleForm">
                     <input type="hidden" id="roleUserId" name="userId">
                     
                     <div class="form-group">
@@ -218,7 +211,7 @@
                     </div>
                     
                     <div class="modal-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeModal('changeRoleModal')">Cancel</button>
+                        <button type="button" class="btn btn-secondary" data-close-modal="changeRoleModal">Cancel</button>
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-check"></i> Change Role
                         </button>
@@ -343,100 +336,3 @@
 }
 </style>
 
-<script>
-async function createUser(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData);
-    
-    try {
-        const response = await api.post('/api/users', data);
-        showToast('User created successfully', 'success');
-        closeModal('newUserModal');
-        form.reset();
-        setTimeout(() => window.location.reload(), 1000);
-    } catch (error) {
-        showToast(error.message || 'Failed to create user', 'error');
-    }
-}
-
-async function editUser(userId) {
-    try {
-        const response = await api.get(`/api/users/${userId}`);
-        document.getElementById('editUserId').value = response.user._id;
-        document.getElementById('editUserName').value = response.user.name;
-        document.getElementById('editUserEmail').value = response.user.email;
-        document.getElementById('editUserDepartment').value = response.user.department || '';
-        openModal('editUserModal');
-    } catch (error) {
-        showToast('Failed to load user data', 'error');
-    }
-}
-
-async function updateUser(e) {
-    e.preventDefault();
-    const form = e.target;
-    const userId = document.getElementById('editUserId').value;
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData);
-    delete data.userId;
-    
-    try {
-        await api.put(`/api/users/${userId}`, data);
-        showToast('User updated successfully', 'success');
-        closeModal('editUserModal');
-        setTimeout(() => window.location.reload(), 1000);
-    } catch (error) {
-        showToast(error.message || 'Failed to update user', 'error');
-    }
-}
-
-async function changeRole(userId) {
-    document.getElementById('roleUserId').value = userId;
-    openModal('changeRoleModal');
-}
-
-async function updateUserRole(e) {
-    e.preventDefault();
-    const userId = document.getElementById('roleUserId').value;
-    const role = document.getElementById('newRole').value;
-    
-    try {
-        await api.patch(`/api/users/${userId}/role`, { role });
-        showToast('User role updated successfully', 'success');
-        closeModal('changeRoleModal');
-        setTimeout(() => window.location.reload(), 1000);
-    } catch (error) {
-        showToast(error.message || 'Failed to update role', 'error');
-    }
-}
-
-async function toggleUserStatus(userId, enable) {
-    const action = enable ? 'enable' : 'disable';
-    if (!confirm(`Are you sure you want to ${action} this user?`)) return;
-    
-    try {
-        await api.patch(`/api/users/${userId}/status`, { isActive: enable });
-        showToast(`User ${action}d successfully`, 'success');
-        setTimeout(() => window.location.reload(), 1000);
-    } catch (error) {
-        showToast(`Failed to ${action} user`, 'error');
-    }
-}
-
-// Role filter
-document.getElementById('roleFilter')?.addEventListener('change', function() {
-    const role = this.value;
-    const rows = document.querySelectorAll('.data-table tbody tr');
-    
-    rows.forEach(row => {
-        if (!role) {
-            row.style.display = '';
-        } else {
-            const userRole = row.querySelector('.user-role').textContent;
-            row.style.display = userRole === role ? '' : 'none';
-        }
-    });
-});
-</script>

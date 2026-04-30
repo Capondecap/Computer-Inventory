@@ -6,6 +6,7 @@ const requireAuth = require('../middleware/requireAuth');
 const requireRole = require('../middleware/requireRole');
 
 router.get('/', requireAuth, assetController.getAll);
+router.get('/search', requireAuth, assetController.search);
 router.get('/:id/history', requireAuth, assetController.getHistory);
 router.post('/', requireAuth, assetController.create);
 router.put('/:id', requireAuth, assetController.update);

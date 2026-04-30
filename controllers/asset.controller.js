@@ -9,11 +9,33 @@ const getAll = async (req, res, next) => {
   }
 };
 
+const search = async (req, res, next) => {
+  try {
+    const items = await assetService.searchAssets({
+      q: req.query.q,
+      status: req.query.status,
+      limit: req.query.limit,
+    });
+    res.json({ success: true, items });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const create = async (req, res, next) => {
   try {
-    const asset = await assetService.createAsset(req.body);
+    const body = { ...req.body };
+    if (body.assetId && !body.itemId) { body.itemId = body.assetId; delete body.assetId; }
+    const asset = await assetService.createAsset(body);
     res.status(201).json({ success: true, data: asset });
   } catch (err) {
+    if (err.name === 'ValidationError') {
+      return res.status(422).json({
+        success: false,
+        message: 'Validation failed',
+        errors: Object.values(err.errors).map((e) => ({ msg: e.message })),
+      });
+    }
     // duplicate key (itemId or serialNumber)
     if (err.code === 11000) {
       const field = Object.keys(err.keyPattern)[0];
@@ -30,6 +52,13 @@ const update = async (req, res, next) => {
     if (!asset) return res.status(404).json({ success: false, message: 'Asset not found' });
     res.json({ success: true, data: asset });
   } catch (err) {
+    if (err.name === 'ValidationError') {
+      return res.status(422).json({
+        success: false,
+        message: 'Validation failed',
+        errors: Object.values(err.errors).map((e) => ({ msg: e.message })),
+      });
+    }
     if (err.code === 11000) {
       const field = Object.keys(err.keyPattern)[0];
       err.status = 409;
@@ -59,4 +88,4 @@ const getHistory = async (req, res, next) => {
   }
 };
 
-module.exports = { getAll, create, update, remove, getHistory };
+module.exports = { getAll, search, create, update, remove, getHistory };

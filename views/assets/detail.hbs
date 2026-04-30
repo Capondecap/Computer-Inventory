@@ -119,13 +119,15 @@
         <div class="card-body">
             <div class="assignment-info">
                 <div class="assignment-user">
-                    <div class="user-avatar-lg">
-                        <i class="fas fa-user"></i>
+                    <div class="user-avatar-block">
+                        <div class="user-avatar-lg">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h3 class="user-name-label">{{currentAssignment.user.name}}</h3>
                     </div>
                     <div class="user-info">
-                        <h3>{{currentAssignment.user.name}}</h3>
-                        <p>{{currentAssignment.user.email}}</p>
-                        <span class="badge badge-info">{{currentAssignment.user.department}}</span>
+                        <p class="user-email-text">{{currentAssignment.user.email}}</p>
+                        <span class="badge badge-info">{{currentAssignment.user.role}}</span>
                     </div>
                 </div>
                 <div class="assignment-details">
@@ -137,18 +139,25 @@
                         <label>Duration</label>
                         <div class="detail-value">{{getDuration currentAssignment.checkoutDate}}</div>
                     </div>
-                    {{#if currentAssignment.document}}
-                    <div class="detail-item">
+                    {{#if currentAssignment.documentPath}}
+                    <div class="detail-item full-width">
                         <label>Reference Document</label>
                         <div class="detail-value">
-                            <a href="/uploads/{{currentAssignment.document}}" target="_blank" class="doc-link">
-                                <i class="fas fa-file-pdf"></i> View Document
+                            <a href="/uploads/{{currentAssignment.documentPath}}" target="_blank" class="doc-preview-card">
+                                <div class="doc-icon">
+                                    <i class="fas fa-file-image"></i>
+                                </div>
+                                <div class="doc-info">
+                                    <span class="doc-name">Reference Document</span>
+                                    <span class="doc-meta">Assigned to {{currentAssignment.user.name}}</span>
+                                </div>
+                                <i class="fas fa-external-link-alt doc-external"></i>
                             </a>
                         </div>
                     </div>
                     {{/if}}
                 </div>
-                <a href="/assignments/checkin?assetId={{asset._id}}" class="btn btn-warning btn-block">
+                <a href="/assignments/checkin?assetId={{asset._id}}" class="btn btn-warning btn-block" style="margin-top: 1.5rem;">
                     <i class="fas fa-sign-in-alt"></i> Check In Asset
                 </a>
             </div>
@@ -169,24 +178,37 @@
             <div class="timeline">
                 {{#each history}}
                 <div class="timeline-item">
-                    <div class="timeline-marker {{this.type}}">
-                        <i class="fas {{#ifEquals this.type 'checkout'}}fa-sign-out-alt{{else}}fa-sign-in-alt{{/ifEquals}}"></i>
+                    <div class="timeline-marker {{this.eventType}}">
+                        <i class="fas {{#ifEquals this.eventType 'checkout'}}fa-sign-out-alt{{else}}fa-sign-in-alt{{/ifEquals}}"></i>
                     </div>
                     <div class="timeline-content">
                         <div class="timeline-header">
-                            <h4>{{#ifEquals this.type 'checkout'}}Checked Out{{else}}Checked In{{/ifEquals}}</h4>
-                            <span class="timeline-date">{{formatDate this.date}}</span>
+                            <h4>{{#ifEquals this.eventType 'checkout'}}Checked Out{{else}}Checked In{{/ifEquals}}</h4>
+                            <span class="timeline-date">{{formatDate this.checkoutDate}}{{#unless this.checkoutDate}}{{formatDate this.checkinDate}}{{/unless}}</span>
                         </div>
                         <p class="timeline-user">
-                            {{#ifEquals this.type 'checkout'}}Assigned to{{else}}Returned by{{/ifEquals}} 
-                            <strong>{{this.user.name}}</strong>
+                            {{#ifEquals this.eventType 'checkout'}}Assigned to{{else}}Returned by{{/ifEquals}}
+                            <strong>{{this.assignedTo.name}}</strong>
                         </p>
+                        {{#if this.durationDays}}
+                        <p class="timeline-notes">Duration: {{this.durationDays}} day(s)</p>
+                        {{/if}}
                         {{#if this.notes}}
                         <p class="timeline-notes">{{this.notes}}</p>
                         {{/if}}
-                        {{#if this.document}}
-                        <a href="/uploads/{{this.document}}" class="timeline-doc" target="_blank">
-                            <i class="fas fa-paperclip"></i> View Document
+                        {{#if this.documentPath}}
+                        <a href="/uploads/{{this.documentPath}}" target="_blank" class="doc-preview-card compact">
+                            <div class="doc-icon">
+                                <i class="fas fa-file-image"></i>
+                            </div>
+                            <div class="doc-info">
+                                <span class="doc-name">Reference Document</span>
+                                <span class="doc-meta">
+                                    {{#ifEquals this.eventType 'checkout'}}Assigned to{{else}}Returned by{{/ifEquals}} 
+                                    {{this.assignedTo.name}}
+                                </span>
+                            </div>
+                            <i class="fas fa-external-link-alt doc-external"></i>
                         </a>
                         {{/if}}
                     </div>

@@ -2,9 +2,6 @@
     <a href="/assets/new" class="btn btn-primary">
         <i class="fas fa-plus"></i> Add New Asset
     </a>
-    <button class="btn btn-secondary" id="export-btn">
-        <i class="fas fa-download"></i> Export
-    </button>
 </div>
 
 <!-- Filters and Search -->
@@ -60,6 +57,16 @@
 <!-- Assets Table -->
 <div class="card">
     <div class="card-body">
+        {{#if query.success}}
+        <div class="alert alert-success" role="alert">
+            <i class="fas fa-check-circle"></i>
+            <div class="alert-content">
+                <strong>Success!</strong>
+                <p>{{query.message}}</p>
+            </div>
+        </div>
+        {{/if}}
+
         {{#if assets.length}}
         <div class="table-responsive">
             <table class="data-table">
@@ -112,9 +119,6 @@
                                 <a href="/assets/{{this._id}}/edit" class="btn-icon" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="/assets/{{this._id}}/history" class="btn-icon" title="View History">
-                                    <i class="fas fa-history"></i>
-                                </a>
                                 {{#if (isAdmin ../user.role)}}
                                 <button class="btn-icon btn-danger" onclick="deleteAsset('{{this._id}}')" title="Delete">
                                     <i class="fas fa-trash"></i>
@@ -134,10 +138,7 @@
         <div class="empty-state">
             <i class="fas fa-inbox"></i>
             <h3>No assets found</h3>
-            <p>Try adjusting your filters or add a new asset to get started.</p>
-            <a href="/assets/new" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Add New Asset
-            </a>
+            <p>We couldn't find any assets matching your current filters or search terms.</p>
         </div>
         {{/if}}
     </div>
@@ -175,9 +176,4 @@ function deleteAsset(id) {
     }
 }
 
-// Export functionality
-document.getElementById('export-btn')?.addEventListener('click', function() {
-    const params = new URLSearchParams(window.location.search);
-    window.location.href = '/api/items/export?' + params.toString();
-});
 </script>

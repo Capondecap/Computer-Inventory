@@ -26,6 +26,8 @@ const login = async ({ email, password }) => {
     throw err;
   }
 
+  User.updateOne({ _id: user._id }, { lastLogin: new Date() }).exec();
+
   const payload = { sub: user._id, role: user.role };
   const token = jwt.sign(payload, secret, { expiresIn });
 

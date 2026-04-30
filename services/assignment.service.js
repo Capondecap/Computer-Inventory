@@ -10,10 +10,16 @@ const checkout = async ({ assetId, assignedTo, assignedBy, expectedReturnDate, p
   session.startTransaction();
 
   try {
-    const asset = await Asset.findById(assetId).session(session);
+    const [asset, targetUser] = await Promise.all([
+      Asset.findById(assetId).session(session),
+      require('../models/User.model').findById(assignedTo).session(session)
+    ]);
 
     if (!asset) {
       throw Object.assign(new Error('Asset not found'), { status: 404 });
+    }
+    if (!targetUser) {
+      throw Object.assign(new Error('Assigned user not found'), { status: 404 });
     }
 
     if (BLOCKED_STATUSES.includes(asset.status)) {
@@ -51,7 +57,7 @@ const checkout = async ({ assetId, assignedTo, assignedBy, expectedReturnDate, p
       asset: asset._id,
       performedBy: assignedBy,
       action: 'checked_out',
-      description: `Checked out to user ${assignedTo}`,
+      description: `Checked out to ${targetUser.name}`,
       changes: { status: { from: prevStatus, to: 'In-Use' } },
       relatedModel: 'Assignment',
       relatedId: assignment._id,
@@ -69,7 +75,9 @@ const checkout = async ({ assetId, assignedTo, assignedBy, expectedReturnDate, p
   }
 };
 
-const checkin = async ({ assetId, performedBy, condition, notes, documentPath, ipAddress }) => {
+const VALID_POST_CHECKIN_STATUSES = ['Available', 'Maintenance', 'Retired'];
+
+const checkin = async ({ assetId, performedBy, condition, notes, newStatus, documentPath, ipAddress }) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -107,15 +115,15 @@ const checkin = async ({ assetId, performedBy, condition, notes, documentPath, i
     );
 
     const prevStatus = asset.status;
-    asset.status = 'Available';
+    asset.status = VALID_POST_CHECKIN_STATUSES.includes(newStatus) ? newStatus : 'Available';
     await asset.save({ session });
 
     await auditSvc.log({
       asset: asset._id,
       performedBy,
       action: 'checked_in',
-      description: 'Asset returned and marked available',
-      changes: { status: { from: prevStatus, to: 'Available' } },
+      description: `Asset returned and marked ${asset.status}`,
+      changes: { status: { from: prevStatus, to: asset.status } },
       relatedModel: 'Assignment',
       relatedId: assignment._id,
       ipAddress,

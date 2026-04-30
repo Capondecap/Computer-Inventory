@@ -1,1 +1,90 @@
+<div class="page-actions">
+    <a href="/assignments/checkout" class="btn btn-primary">
+        <i class="fas fa-sign-out-alt"></i> Check Out Asset
+    </a>
+</div>
 
+<!-- Assignments Table -->
+<div class="card">
+    <div class="card-header">
+        <h3>Active Assignments</h3>
+        <p class="card-subtitle">Assets currently checked out to users</p>
+    </div>
+    <div class="card-body">
+        {{#if assignments.length}}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Asset ID</th>
+                        <th>Asset</th>
+                        <th>Assigned To</th>
+                        <th>Checked Out</th>
+                        <th>Duration</th>
+                        <th>Expected Return</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each assignments}}
+                    <tr>
+                        <td><code>{{this.asset.itemId}}</code></td>
+                        <td>
+                            <a href="/assets/{{this.asset._id}}" class="asset-link">
+                                {{this.asset.brand}} {{this.asset.model}}
+                            </a><br>
+                            <small class="text-muted">SN: {{this.asset.serialNumber}}</small>
+                        </td>
+                        <td>
+                            <strong>{{this.assignedTo.name}}</strong><br>
+                            <small class="text-muted">{{this.assignedTo.email}}</small>
+                        </td>
+                        <td>{{formatDate this.checkoutDate}}</td>
+                        <td>
+                            <span class="badge badge-info">{{this.durationText}}</span>
+                        </td>
+                        <td>
+                            {{#if this.expectedReturnDate}}
+                                {{formatDate this.expectedReturnDate}}
+                            {{else}}
+                                <span class="text-muted">—</span>
+                            {{/if}}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="/assets/{{this.asset._id}}" class="btn-icon" title="View Asset">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="/assignments/checkin?assetId={{this.asset._id}}" class="btn-icon btn-success" title="Check In">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+        {{else}}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h3>No active assignments</h3>
+            <p>All assets have been returned or are available for checkout.</p>
+            <a href="/assignments/checkout" class="btn btn-primary">
+                <i class="fas fa-sign-out-alt"></i> Check Out Asset
+            </a>
+        </div>
+        {{/if}}
+    </div>
+</div>
+
+<style>
+.text-muted { color: var(--text-secondary); font-size: 0.875rem; }
+</style>
+
+<script>
+// Calculate duration dynamically if needed
+document.querySelectorAll('table tbody tr').forEach(row => {
+    // Duration already calculated by service, but could add live update here if desired
+});
+</script>
