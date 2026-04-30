@@ -13,6 +13,7 @@ const flexAuth = (req, res, next) => {
 };
 
 router.get('/', flexAuth, assetController.getAll);
+router.get('/:id/history', authenticate, assetController.getHistory);
 router.post('/', authenticate, assetController.create);
 router.put('/:id', authenticate, assetController.update);
 router.delete('/:id', authenticate, requireRole('Admin'), assetController.remove);

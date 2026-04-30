@@ -11,6 +11,7 @@ const indexRoutes = require('./routes/index');
 const authRoutes = require('./routes/auth.routes');
 const assetRoutes = require('./routes/asset.routes');
 const assignmentRoutes = require('./routes/assignment.routes');
+const reportRoutes = require('./routes/report.routes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -47,6 +48,7 @@ app.use('/auth', authRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/items', assetRoutes);
 app.use('/api/transactions', assignmentRoutes);
+app.use('/api/reports', reportRoutes);
 
 app.use(errorHandler);
 

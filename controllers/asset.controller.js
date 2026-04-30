@@ -49,4 +49,14 @@ const remove = async (req, res, next) => {
   }
 };
 
-module.exports = { getAll, create, update, remove };
+const getHistory = async (req, res, next) => {
+  try {
+    const result = await assetService.getAssetHistory(req.params.id);
+    if (!result) return res.status(404).json({ success: false, message: 'Asset not found' });
+    res.json({ success: true, data: result });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { getAll, create, update, remove, getHistory };
