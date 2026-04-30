@@ -7,6 +7,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 
+const authenticate = require('./middleware/authenticate');
 const indexRoutes = require('./routes/index');
 const authRoutes = require('./routes/auth.routes');
 const assetRoutes = require('./routes/asset.routes');
@@ -21,6 +22,11 @@ app.engine('hbs', engine({
   defaultLayout: 'main',
   layoutsDir: path.join(__dirname, 'views/layouts'),
   partialsDir: path.join(__dirname, 'views/partials'),
+  helpers: {
+    json: (val) => JSON.stringify(val ?? []),
+    isAdmin: (role) => role === 'admin',
+    formatDate: (date) => (date ? new Date(date).toLocaleDateString() : ''),
+  },
 }));
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
@@ -42,6 +48,7 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 app.use(express.static('public'));
+app.use(authenticate);
 
 app.use('/', indexRoutes);
 app.use('/auth', authRoutes);

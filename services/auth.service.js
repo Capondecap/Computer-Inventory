@@ -21,7 +21,7 @@ const login = async ({ email, password }) => {
   }
 
   if (!user.isActive) {
-    const err = new Error('Account is disabled. Contact your administrator.');
+    const err = new Error('Access denied. Contact your administrator.');
     err.status = 403;
     throw err;
   }
