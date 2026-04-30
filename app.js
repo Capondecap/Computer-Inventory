@@ -8,6 +8,8 @@ const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 
 const authenticate = require('./middleware/authenticate');
+const apiKeyAuth = require('./middleware/apiKeyAuth');
+const { apiLimiter } = require('./middleware/rateLimiter');
 const indexRoutes = require('./routes/index');
 const authRoutes = require('./routes/auth.routes');
 const assetRoutes = require('./routes/asset.routes');
@@ -49,6 +51,7 @@ if (process.env.NODE_ENV !== 'test') {
 
 app.use(express.static('public'));
 app.use(authenticate);
+app.use('/api/', apiLimiter, apiKeyAuth);
 
 app.use('/', indexRoutes);
 app.use('/auth', authRoutes);
