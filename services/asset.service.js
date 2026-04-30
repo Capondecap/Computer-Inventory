@@ -4,8 +4,8 @@ const { paginate, paginationMeta } = require('../utils/pagination');
 const buildFilter = (query) => {
   const filter = {};
 
-  if (query.status)         filter.status = query.status;
-  if (query.category)       filter.category = query.category;
+  if (query.status) filter.status = query.status;
+  if (query.category) filter.category = query.category;
   if (query.classification) filter.classification = query.classification;
 
   if (query.search) {

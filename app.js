@@ -10,6 +10,7 @@ const morgan = require('morgan');
 const indexRoutes = require('./routes/index');
 const authRoutes = require('./routes/auth.routes');
 const assetRoutes = require('./routes/asset.routes');
+const assignmentRoutes = require('./routes/assignment.routes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -45,6 +46,7 @@ app.use('/', indexRoutes);
 app.use('/auth', authRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/items', assetRoutes);
+app.use('/api/transactions', assignmentRoutes);
 
 app.use(errorHandler);
 

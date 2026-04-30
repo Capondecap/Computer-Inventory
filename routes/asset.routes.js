@@ -12,9 +12,9 @@ const flexAuth = (req, res, next) => {
   return authenticate(req, res, next);
 };
 
-router.get('/',           flexAuth,                                  assetController.getAll);
-router.post('/',          authenticate,                              assetController.create);
-router.put('/:id',        authenticate,                              assetController.update);
-router.delete('/:id',     authenticate, requireRole('Admin'),        assetController.remove);
+router.get('/', flexAuth, assetController.getAll);
+router.post('/', authenticate, assetController.create);
+router.put('/:id', authenticate, assetController.update);
+router.delete('/:id', authenticate, requireRole('Admin'), assetController.remove);
 
 module.exports = router;
