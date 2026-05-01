@@ -12,6 +12,14 @@ const Assignment = require('../models/Assignment.model');
 
 const router = express.Router();
 
+function formatDuration(diffDays) {
+  if (diffDays < 365) return `${diffDays} days`;
+  const years = Math.floor(diffDays / 365);
+  const remainingDays = diffDays % 365;
+  const yearLabel = years === 1 ? '1 year' : `${years} years`;
+  return remainingDays === 0 ? yearLabel : `${yearLabel} and ${remainingDays} days`;
+}
+
 const getAssignableUsers = () =>
   User.find({ $or: [{ isActive: true }, { isActive: { $exists: false } }] })
     .sort({ name: 1 })
@@ -569,8 +577,8 @@ router.get('/assignments', requireAuth, async (req, res, next) => {
       const diffTime = today - checkoutDate;
       const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
       
-      const durationText = `${diffDays} days`;
-      
+      const durationText = formatDuration(diffDays);
+
       return { ...a, durationText };
     });
 
@@ -699,12 +707,25 @@ router.get('/reports/user-audit', requireAuth, async (req, res, next) => {
       if (data) {
         report = {
           user: data.user,
-          assets: data.assignedAssets.map(a => ({
-            ...a.asset,
-            assetId: a.asset.itemId,
-            checkoutDate: a.checkoutDate,
-            expectedReturnDate: a.expectedReturnDate,
-          })),
+          assets: data.assignedAssets.map(a => {
+            const checkoutDate = a.checkoutDate ? new Date(a.checkoutDate) : null;
+            let durationText = 'Unknown';
+            if (checkoutDate) {
+              const start = new Date(checkoutDate);
+              start.setHours(0, 0, 0, 0);
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              const diffDays = Math.round((today - start) / (1000 * 60 * 60 * 24));
+              durationText = formatDuration(diffDays);
+            }
+            return {
+              ...a.asset,
+              assetId: a.asset.itemId,
+              checkoutDate,
+              expectedReturnDate: a.expectedReturnDate,
+              durationText,
+            };
+          }),
         };
       }
     }

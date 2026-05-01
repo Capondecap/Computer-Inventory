@@ -120,7 +120,7 @@ const userAudit = async (userId) => {
           category: '$asset.category',
           status: '$asset.status',
         },
-        checkoutDate: '$lastCheckout.checkoutDate',
+        checkoutDate: { $ifNull: ['$lastCheckout.checkoutDate', '$lastCheckout.createdAt'] },
         expectedReturnDate: '$lastCheckout.expectedReturnDate',
         purpose: '$lastCheckout.purpose',
         documentPath: '$lastCheckout.documentPath',

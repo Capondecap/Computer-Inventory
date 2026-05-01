@@ -171,22 +171,22 @@
         <div class="card-body">
             {{#if report.assets.length}}
             <div class="table-responsive">
-                <table class="data-table">
+                <table class="data-table" style="text-align: center;">
                     <thead>
                         <tr>
-                            <th>Asset ID</th>
-                            <th>Category</th>
-                            <th>Model</th>
-                            <th>Date Acquired</th>
-                            <th>Age</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+                            <th style="text-align: center;">Asset ID</th>
+                            <th style="text-align: center;">Category</th>
+                            <th style="text-align: center;">Model</th>
+                            <th style="text-align: center;">Date Acquired</th>
+                            <th style="text-align: center;">Age</th>
+                            <th style="text-align: center;">Status</th>
+                            <th style="text-align: center;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {{#each report.assets}}
                         <tr>
-                            <td><a href="/assets/{{this._id}}">{{this.assetId}}</a></td>
+                            <td><a href="/assets/{{this._id}}">{{this.itemId}}</a></td>
                             <td>
                                 <span class="badge badge-category">
                                     <i class="fas {{getCategoryIcon this.category}}"></i>
@@ -273,7 +273,7 @@
                     <tbody>
                         {{#each report.assets}}
                         <tr>
-                            <td><a href="/assets/{{this._id}}">{{this.assetId}}</a></td>
+                            <td><a href="/assets/{{this._id}}">{{this.itemId}}</a></td>
                             <td>
                                 <span class="badge badge-category">
                                     <i class="fas {{getCategoryIcon this.category}}"></i>
@@ -283,7 +283,7 @@
                             <td>{{this.brand}} {{this.model}}</td>
                             <td><code class="serial-number">{{this.serialNumber}}</code></td>
                             <td>{{formatDate this.checkoutDate}}</td>
-                            <td>{{getDuration this.checkoutDate}}</td>
+                            <td>{{this.durationText}}</td>
                             <td>
                                 <a href="/assets/{{this._id}}" class="btn-icon" title="View">
                                     <i class="fas fa-eye"></i>

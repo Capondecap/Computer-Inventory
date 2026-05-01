@@ -2,7 +2,7 @@ const assignmentSvc = require('../services/assignment.service');
 
 const checkout = async (req, res, next) => {
   try {
-    const { assetId, assignedTo, expectedReturnDate, purpose, condition, notes } = req.body;
+    const { assetId, assignedTo, checkoutDate, expectedReturnDate, purpose, condition, notes } = req.body;
 
     if (!assetId || !assignedTo) {
       return res.status(400).json({ success: false, message: 'assetId and assignedTo are required' });
@@ -12,6 +12,7 @@ const checkout = async (req, res, next) => {
       assetId,
       assignedTo,
       assignedBy: req.user.sub,
+      checkoutDate: checkoutDate || null,
       expectedReturnDate: expectedReturnDate || null,
       purpose,
       condition,

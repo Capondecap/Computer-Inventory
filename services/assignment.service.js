@@ -5,7 +5,7 @@ const auditSvc = require('./audit.service');
 
 const BLOCKED_STATUSES = ['Maintenance', 'Retired'];
 
-const checkout = async ({ assetId, assignedTo, assignedBy, expectedReturnDate, purpose, condition, notes, documentPath, ipAddress }) => {
+const checkout = async ({ assetId, assignedTo, assignedBy, checkoutDate, expectedReturnDate, purpose, condition, notes, documentPath, ipAddress }) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -39,7 +39,7 @@ const checkout = async ({ assetId, assignedTo, assignedBy, expectedReturnDate, p
         assignedTo,
         assignedBy,
         eventType: 'checkout',
-        checkoutDate: new Date(),
+        checkoutDate: checkoutDate ? new Date(checkoutDate) : new Date(),
         expectedReturnDate: expectedReturnDate || null,
         purpose: purpose || null,
         condition: condition || 'Good',
