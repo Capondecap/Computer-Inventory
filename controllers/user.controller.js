@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const User = require('../models/User.model');
+const ApiKey = require('../models/ApiKey.model');
 
 const createUser = async (req, res, next) => {
   const errors = validationResult(req);
@@ -61,6 +62,10 @@ const updateStatus = async (req, res, next) => {
     const user = await User.findByIdAndUpdate(id, { isActive }, { new: true });
 
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    if (!isActive) {
+      await ApiKey.updateMany({ user: id }, { isActive: false });
+    }
 
     res.json({ success: true, user: { id: user._id, name: user.name, email: user.email, role: user.role, isActive: user.isActive } });
   } catch (err) {

@@ -32,7 +32,8 @@ const apiKeyAuth = async (req, res, next) => {
     }
 
     // Non-blocking — don't delay the request for a stats update
-    ApiKey.updateOne({ _id: apiKey._id }, { lastUsedAt: new Date() }).exec();
+    ApiKey.updateOne({ _id: apiKey._id }, { lastUsedAt: new Date() }).exec()
+      .catch(err => console.error('[apiKeyAuth] lastUsedAt update failed:', err.message));
 
     req.user = { sub: user._id, role: user.role };
   } catch {

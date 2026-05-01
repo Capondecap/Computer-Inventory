@@ -41,7 +41,11 @@
                         <td><code>...{{this.keyPreview}}</code></td>
                         <td>
                             {{#if this.isActive}}
-                                <span class="badge badge-success">Active</span>
+                                {{#if (isExpired this.expiresAt)}}
+                                    <span class="badge badge-warning">Expired</span>
+                                {{else}}
+                                    <span class="badge badge-success">Active</span>
+                                {{/if}}
                             {{else}}
                                 <span class="badge badge-danger">Revoked</span>
                             {{/if}}
@@ -165,10 +169,13 @@
 async function generateKey(e) {
     e.preventDefault();
     const form = e.target;
+    const submitBtn = form.querySelector('[type="submit"]');
     const formData = new FormData(form);
     const data = {};
     formData.forEach((v, k) => { if (v) data[k] = v; });
 
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
     try {
         const response = await api.post('/api/keys', data);
         closeModal('newKeyModal');
@@ -177,6 +184,9 @@ async function generateKey(e) {
         openModal('keyDisplayModal');
     } catch (error) {
         showToast(error.message || 'Failed to generate key', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-key"></i> Generate';
     }
 }
 

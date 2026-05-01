@@ -16,7 +16,7 @@ const createKey = async (req, res, next) => {
       keyPreview: preview,
       name,
       user: userId ?? req.user.sub,
-      expiresAt: expiresAt ?? null,
+      expiresAt: expiresAt ? new Date(expiresAt) : null,
     });
 
     // Raw key returned once — never stored, never retrievable again

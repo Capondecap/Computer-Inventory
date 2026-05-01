@@ -53,6 +53,11 @@ router.post('/auth/logout', (req, res) => {
   res.redirect('/auth/login');
 });
 
+router.get('/logout', (req, res) => {
+  res.clearCookie('token');
+  res.redirect('/auth/login');
+});
+
 // ── Dashboard ─────────────────────────────────────────────────────
 router.get('/dashboard', requireAuth, async (req, res, next) => {
   try {
@@ -720,7 +725,7 @@ router.get('/reports/user-audit', requireAuth, async (req, res, next) => {
 // ── API Keys ──────────────────────────────────────────────────────
 router.get('/api-keys', requireAuth, requireRole('Admin'), async (req, res, next) => {
   try {
-    const keys = await ApiKey.find().populate('user', 'name email').sort({ createdAt: -1 });
+    const keys = await ApiKey.find().populate('user', 'name email').sort({ createdAt: -1 }).lean();
     const users = await User.find().select('name email').lean();
     res.render('api-keys/index', {
       layout: 'main',

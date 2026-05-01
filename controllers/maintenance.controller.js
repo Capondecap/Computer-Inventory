@@ -70,7 +70,11 @@ const complete = async (req, res, next) => {
 const remove = async (req, res, next) => {
   try {
     const Maintenance = require('../models/Maintenance.model');
-    const record = await Maintenance.findByIdAndDelete(req.params.id);
+    const record = await Maintenance.findByIdAndUpdate(
+      req.params.id,
+      { isDeleted: true },
+      { new: true }
+    );
     if (!record) return res.status(404).json({ success: false, message: 'Maintenance record not found' });
     res.json({ success: true, message: 'Maintenance record deleted' });
   } catch (err) {

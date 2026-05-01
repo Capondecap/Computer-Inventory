@@ -55,9 +55,20 @@ const maintenanceSchema = new mongoose.Schema(
       min: 0,
       default: null,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
+
+maintenanceSchema.pre(/^find/, function (next) {
+  if (!this.getOptions().includeDeleted) {
+    this.where({ isDeleted: false });
+  }
+  next();
+});
 
 maintenanceSchema.index({ asset: 1, status: 1 });
 

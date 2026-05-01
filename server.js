@@ -10,6 +10,22 @@ if (!fs.existsSync(path.join(__dirname, '.env'))) {
 }
 
 require('dotenv').config();
+
+// Validate required environment variables before loading anything else
+const REQUIRED = ['MONGO_URI', 'JWT_SECRET'];
+const missing = REQUIRED.filter(k => !process.env[k]);
+if (missing.length) {
+  console.error(`\n[Server] STARTUP FAILED: missing required env vars: ${missing.join(', ')}`);
+  console.error('[Server] Copy .env.example to .env and fill in all values.\n');
+  process.exit(1);
+}
+if (!process.env.ALLOWED_ORIGINS) {
+  console.warn('[Server] WARNING: ALLOWED_ORIGINS is not set — defaulting to http://localhost:3000');
+}
+if (!process.env.NODE_ENV) {
+  console.warn('[Server] WARNING: NODE_ENV is not set — defaulting to development');
+}
+
 const app = require('./app');
 const connectDB = require('./config/db');
 
