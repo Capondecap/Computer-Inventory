@@ -66,13 +66,13 @@ if (process.env.NODE_ENV !== 'test') {
 app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
 app.use(authenticate);
+app.use('/api/keys', apiKeyRoutes);
 app.use('/api/', apiLimiter, apiKeyAuth);
 
 app.use('/', indexRoutes);
 app.use('/auth', authRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/keys', apiKeyRoutes);
 app.use('/api/items', assetRoutes);
 app.use('/api/transactions', assignmentRoutes);
 app.use('/api/reports', reportRoutes);

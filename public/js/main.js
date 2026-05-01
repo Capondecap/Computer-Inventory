@@ -84,7 +84,7 @@ function initSidebar() {
 // ============================================
 function initAlerts() {
   // Auto-dismiss alerts after 5 seconds
-  const alerts = document.querySelectorAll('.alert');
+  const alerts = document.querySelectorAll('.alert:not(.alert-static)');
   alerts.forEach(alert => {
     setTimeout(() => {
       dismissAlert(alert);

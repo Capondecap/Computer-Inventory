@@ -1,0 +1,114 @@
+<div class="local-nav">
+    <a href="/api-keys" class="local-nav-item">
+        <i class="fas fa-key"></i>
+        <span>API Keys</span>
+    </a>
+    <a href="/api-keys/new" class="local-nav-item active">
+        <i class="fas fa-plus-circle"></i>
+        <span>Generate API Key</span>
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>Generate API Key</h3>
+        <p class="card-subtitle">Keys are stored hashed and cannot be retrieved after creation.</p>
+    </div>
+    <div class="card-body">
+<form id="newKeyForm" onsubmit="generateKey(event)">
+            <div class="form-group">
+                <label for="keyName" class="required">Key Name / Label</label>
+                <input type="text" id="keyName" name="name" class="form-control"
+                    placeholder="e.g., CI/CD Pipeline, Monitoring Bot" required>
+            </div>
+            <div class="form-group">
+                <label for="keyUserId">Assign to User</label>
+                <select id="keyUserId" name="userId" class="form-control">
+                    <option value="">My account (default)</option>
+                    {{#each users}}
+                    <option value="{{this._id}}">{{this.name}} ({{this.email}})</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="keyExpiry">Expiry Date (optional)</label>
+                <input type="date" id="keyExpiry" name="expiresAt" class="form-control">
+                <small class="form-help">Leave blank for no expiry.</small>
+            </div>
+            <div class="form-actions">
+                <a href="/api-keys" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="fas fa-key"></i> Generate
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Key Display Modal (shown once after generation) -->
+<div class="modal-overlay" id="keyDisplayModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>API Key Generated</h3>
+                <button class="modal-close" onclick="closeKeyDisplay()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning alert-static" style="margin-bottom: 1.25rem;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div class="alert-content">
+                        <strong>Important:</strong> Please copy the API key immediately. It will not be shown again.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Your API Key</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="text" id="rawKeyDisplay" class="form-control" readonly style="font-family: monospace; font-size: 0.85rem; background: #f9fafb;">
+                        <button class="btn btn-secondary" onclick="copyRawKey()" title="Copy to clipboard">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function generateKey(e) {
+    e.preventDefault();
+    const form = e.target;
+    const submitBtn = document.getElementById('submitBtn');
+    const formData = new FormData(form);
+    const data = {};
+    formData.forEach((v, k) => { if (v) data[k] = v; });
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+    try {
+        const response = await api.post('/api/keys', data);
+        form.reset();
+        document.getElementById('rawKeyDisplay').value = response.key;
+        openModal('keyDisplayModal');
+    } catch (error) {
+        showToast(error.message || 'Failed to generate key', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-key"></i> Generate';
+    }
+}
+
+function copyRawKey() {
+    const input = document.getElementById('rawKeyDisplay');
+    navigator.clipboard.writeText(input.value).then(() => {
+        showToast('Key copied to clipboard!', 'success');
+    });
+}
+
+function closeKeyDisplay() {
+    closeModal('keyDisplayModal');
+    setTimeout(() => window.location.href = '/api-keys', 300);
+}
+</script>

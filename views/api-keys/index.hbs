@@ -1,10 +1,14 @@
-<div class="page-actions">
-    <button class="btn btn-primary" onclick="openModal('newKeyModal')">
-        <i class="fas fa-plus"></i> Generate API Key
-    </button>
+<div class="local-nav">
+    <a href="/api-keys" class="local-nav-item active">
+        <i class="fas fa-key"></i>
+        <span>API Keys</span>
+    </a>
+    <a href="/api-keys/new" class="local-nav-item">
+        <i class="fas fa-plus-circle"></i>
+        <span>Generate API Key</span>
+    </a>
 </div>
 
-<!-- API Keys Table -->
 <div class="card">
     <div class="card-header">
         <h3>API Keys</h3>
@@ -82,126 +86,15 @@
             <i class="fas fa-key"></i>
             <h3>No API keys yet</h3>
             <p>Generate a key to allow service access via the API.</p>
-            <button class="btn btn-primary" onclick="openModal('newKeyModal')">
+            <a href="/api-keys/new" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Generate API Key
-            </button>
+            </a>
         </div>
         {{/if}}
     </div>
 </div>
 
-<!-- Generate Key Modal -->
-<div class="modal-overlay" id="newKeyModal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Generate API Key</h3>
-                <button class="modal-close" onclick="closeModal('newKeyModal')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="newKeyForm" onsubmit="generateKey(event)">
-                    <div class="form-group">
-                        <label for="keyName" class="required">Key Name / Label</label>
-                        <input type="text" id="keyName" name="name" class="form-control" placeholder="e.g., CI/CD Pipeline, Monitoring Bot" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="keyUserId">Assign to User</label>
-                        <select id="keyUserId" name="userId" class="form-control">
-                            <option value="">My account (default)</option>
-                            {{#each users}}
-                            <option value="{{this._id}}">{{this.name}} ({{this.email}})</option>
-                            {{/each}}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="keyExpiry">Expiry Date (optional)</label>
-                        <input type="date" id="keyExpiry" name="expiresAt" class="form-control">
-                        <small class="form-help">Leave blank for no expiry.</small>
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeModal('newKeyModal')">Cancel</button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-key"></i> Generate
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Key Display Modal (shown once after generation) -->
-<div class="modal-overlay" id="keyDisplayModal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>API Key Generated</h3>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <div class="alert-content">
-                        <strong>Copy this key now.</strong> It will not be shown again.
-                    </div>
-                </div>
-                <div class="form-group" style="margin-top: 1rem;">
-                    <label>Your API Key</label>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <input type="text" id="rawKeyDisplay" class="form-control" readonly style="font-family: monospace;">
-                        <button class="btn btn-secondary" onclick="copyRawKey()">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-primary" onclick="closeKeyDisplay()">
-                        <i class="fas fa-check"></i> I've copied it
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
-async function generateKey(e) {
-    e.preventDefault();
-    const form = e.target;
-    const submitBtn = form.querySelector('[type="submit"]');
-    const formData = new FormData(form);
-    const data = {};
-    formData.forEach((v, k) => { if (v) data[k] = v; });
-
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-    try {
-        const response = await api.post('/api/keys', data);
-        closeModal('newKeyModal');
-        form.reset();
-        document.getElementById('rawKeyDisplay').value = response.key;
-        openModal('keyDisplayModal');
-    } catch (error) {
-        showToast(error.message || 'Failed to generate key', 'error');
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fas fa-key"></i> Generate';
-    }
-}
-
-function copyRawKey() {
-    const input = document.getElementById('rawKeyDisplay');
-    navigator.clipboard.writeText(input.value).then(() => {
-        showToast('Key copied to clipboard!', 'success');
-    });
-}
-
-function closeKeyDisplay() {
-    closeModal('keyDisplayModal');
-    setTimeout(() => window.location.reload(), 300);
-}
-
 async function revokeKey(id) {
     if (!confirm('Revoke this API key? Services using it will lose access immediately.')) return;
     try {

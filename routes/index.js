@@ -729,9 +729,25 @@ router.get('/api-keys', requireAuth, requireRole('Admin'), async (req, res, next
     const users = await User.find().select('name email').lean();
     res.render('api-keys/index', {
       layout: 'main',
-      pageTitle: 'API Key Management',
+      pageTitle: 'API Keys',
       user: req.user,
+      activePage: 'api-keys',
       keys,
+      users,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/api-keys/new', requireAuth, requireRole('Admin'), async (req, res, next) => {
+  try {
+    const users = await User.find().select('name email').lean();
+    res.render('api-keys/generate', {
+      layout: 'main',
+      pageTitle: 'Generate API Key',
+      user: req.user,
+      activePage: 'api-keys',
       users,
     });
   } catch (err) {
