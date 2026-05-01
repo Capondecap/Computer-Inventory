@@ -41,42 +41,64 @@ function initSidebar() {
   const sidebarToggle = document.getElementById('sidebar-toggle');
   const sidebar = document.querySelector('.sidebar');
   const contentArea = document.querySelector('.content-area');
-  
-  if (!sidebarToggle) return;
-  
-  sidebarToggle.addEventListener('click', function() {
-    sidebar.classList.toggle('collapsed');
-    contentArea.classList.toggle('sidebar-collapsed');
-    
-    // Toggle icon
-    const icon = this.querySelector('i');
-    if (sidebar.classList.contains('collapsed')) {
-      icon.classList.remove('fa-chevron-left');
-      icon.classList.add('fa-chevron-right');
-    } else {
-      icon.classList.remove('fa-chevron-right');
-      icon.classList.add('fa-chevron-left');
+  const overlay = document.getElementById('sidebar-overlay');
+
+  if (!sidebar) return;
+
+  if (sidebarToggle) {
+    sidebarToggle.addEventListener('click', function() {
+      sidebar.classList.toggle('collapsed');
+      contentArea.classList.toggle('sidebar-collapsed');
+
+      const icon = this.querySelector('i');
+      if (sidebar.classList.contains('collapsed')) {
+        icon.classList.remove('fa-chevron-left');
+        icon.classList.add('fa-chevron-right');
+      } else {
+        icon.classList.remove('fa-chevron-right');
+        icon.classList.add('fa-chevron-left');
+      }
+
+      localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+    });
+
+    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    if (isCollapsed) {
+      sidebar.classList.add('collapsed');
+      contentArea.classList.add('sidebar-collapsed');
+      sidebarToggle.querySelector('i').classList.replace('fa-chevron-left', 'fa-chevron-right');
     }
-    
-    // Save preference
-    localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-  });
-  
-  // Restore sidebar state
-  const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-  if (isCollapsed) {
-    sidebar.classList.add('collapsed');
-    contentArea.classList.add('sidebar-collapsed');
-    sidebarToggle.querySelector('i').classList.replace('fa-chevron-left', 'fa-chevron-right');
   }
-  
-  // Mobile menu toggle
+
+  function openMobileSidebar() {
+    sidebar.classList.add('show');
+    if (overlay) overlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMobileSidebar() {
+    sidebar.classList.remove('show');
+    if (overlay) overlay.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
   const menuToggle = document.getElementById('mobile-menu-toggle');
   if (menuToggle) {
     menuToggle.addEventListener('click', function() {
-      sidebar.classList.toggle('show');
+      sidebar.classList.contains('show') ? closeMobileSidebar() : openMobileSidebar();
     });
   }
+
+  if (overlay) {
+    overlay.addEventListener('click', closeMobileSidebar);
+  }
+
+  // Close sidebar when a nav link is tapped on mobile
+  sidebar.querySelectorAll('.sidebar-item').forEach(item => {
+    item.addEventListener('click', function() {
+      if (window.innerWidth <= 768) closeMobileSidebar();
+    });
+  });
 }
 
 // ============================================
